@@ -3,6 +3,13 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.4] — 2026-11-18
+**العربية**
+- إصلاح «تعذّر الاتصال بالخادم»: تحويل رابط Web App إلى الشكل العام `/macros/s/.../exec` بدل الشكل المقيّد بالنطاق `/a/macros/sr.edu.sa/.../exec` الذي يكسر نداء المتصفح من GitHub. الأمان يبقى محفوظاً عبر التحقق من رمز Google ونطاق `@sr.edu.sa` داخل `Code.gs` (يتطلّب ضبط صلاحية النشر على "Anyone").
+
+**English**
+- Fixed "server connection failed": switched the Web App URL to the public `/macros/s/.../exec` form instead of the domain-restricted `/a/macros/sr.edu.sa/.../exec` form that breaks browser calls from GitHub. Security is still enforced by the Google-token + `@sr.edu.sa` domain check in `Code.gs` (requires the deployment's access set to "Anyone").
+
 ## [1.3] — 2026-11-18
 **العربية**
 - إصلاح رسالة «تعذّر تحميل خدمة تسجيل الدخول»: أصبح النظام ينتظر تحميل مكتبة Google (GIS) غير المتزامنة (حتى ٦ ثوانٍ) قبل إظهار الزر، مع زر «إعادة المحاولة» عند الفشل.

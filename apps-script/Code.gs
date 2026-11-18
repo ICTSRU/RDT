@@ -1,6 +1,6 @@
 /*  SRU Rooms Digital Twin — Backend (Google Apps Script Web App)
     منصة التوأم الرقمي للقاعات — الخادم
-    Version: 1.3
+    Version: 1.4
     Backend  : Google Sheet (tabs: Rooms, AccessLog)
     Security : Google sign-in restricted to @sr.edu.sa (verified server-side)
     Photos   : uploaded to a Drive folder, URL stored in the Rooms sheet
