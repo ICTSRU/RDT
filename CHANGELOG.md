@@ -3,6 +3,13 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.7] — 2026-11-18
+**العربية**
+- رسائل خطأ دقيقة عند فشل الاتصال بالخادم: تمييز «رد الخادم بصفحة دخول (النشر ليس Anyone)» عن أخطاء الوصول/CORS، بدل رسالة «تعذّر الاتصال بالخادم» العامة. (الحل الجذري: ضبط صلاحية نشر Apps Script على «Anyone».)
+
+**English**
+- Precise error messages when the server call fails: distinguishes "server returned a login page (deployment not Anyone)" from access/CORS errors, replacing the generic "server connection failed". (Root fix: set the Apps Script deployment access to "Anyone".)
+
 ## [1.6] — 2026-11-18
 **العربية**
 - تصحيح شعار ITOC في تذييل الصفحة الداخلية (خلفية بيضاء مستديرة ليظهر فوق الخلفية الداكنة).

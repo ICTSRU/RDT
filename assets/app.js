@@ -36,7 +36,10 @@ function api(action,payload){
   if(!CFG.API_URL){ return Promise.reject({offline:true}); }
   var body = Object.assign({action:action, credential:state.credential}, payload||{});
   return fetch(CFG.API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(body)}).then(function(r){return r.json();});
+    body:JSON.stringify(body), redirect:"follow"})
+    .then(function(r){ return r.text(); })
+    .then(function(t){ try{ return JSON.parse(t); }
+      catch(e){ throw new Error("non_json"); } });   // got an HTML page = deployment not public
 }
 
 // ===== SIGN-IN GATE (ITOC) ==========================================
@@ -101,8 +104,13 @@ function onCredential(resp){
     if(!res || !res.ok){ $("#gate-err").textContent = "تعذّر التحقق من الحساب على الخادم."; return; }
     enterApp(res.email||email, !!res.isAdmin, false);
   }).catch(function(e){
-    if(e && e.offline){ enterApp(email, false, true); }  // no API set yet
-    else $("#gate-err").textContent = "تعذّر الاتصال بالخادم.";
+    if(e && e.offline){ enterApp(email, false, true); return; }  // no API set yet
+    var m = (e && e.message) || "";
+    if(m === "non_json"){
+      $("#gate-err").textContent = "الخادم ردّ بصفحة دخول بدل البيانات — يجب ضبط نشر Apps Script على «Anyone».";
+    } else {
+      $("#gate-err").textContent = "تعذّر الوصول للخادم (CORS/صلاحية النشر). تأكد أن النشر = «Anyone» وأن الرابط في config.js صحيح.";
+    }
   });
 }
 
