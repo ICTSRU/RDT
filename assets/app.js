@@ -68,10 +68,14 @@ function setupGIS(){
   google.accounts.id.initialize({
     client_id: CFG.GOOGLE_CLIENT_ID,
     hd: CFG.ALLOWED_DOMAIN,                 // hint: restrict to the institution domain
+    auto_select: true,                      // SSO: sign in silently if a Google session already exists
     callback: onCredential
   });
+  // visible button as fallback
   google.accounts.id.renderButton($("#gate-btn"),
     {theme:"filled_blue",size:"large",shape:"pill",text:"signin_with",locale:"ar",width:260});
+  // One Tap / automatic sign-in for users already logged into Google (e.g. via ITOC)
+  try { google.accounts.id.prompt(); } catch(e){}
 }
 
 function showDemoEntry(msg){

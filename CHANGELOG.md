@@ -3,6 +3,13 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.5] — 2026-11-18
+**العربية**
+- تفعيل الدخول الموحّد (SSO) التلقائي: `auto_select` + One-Tap، فإن كانت جلسة Google نشطة في المتصفح (مثل من دخل ITOC) يدخل المستخدم مباشرة دون زرّ أو اختيار حساب. شاشة التحقق بخطوتين تبقى من Google وتظهر فقط عند غياب جلسة Google.
+
+**English**
+- Enabled automatic single sign-on (SSO): `auto_select` + One-Tap, so a user with an active Google session (e.g. already signed into ITOC) is signed in silently without clicking or picking an account. Google's 2-step screen is Google's own and only appears when no Google session exists.
+
 ## [1.4] — 2026-11-18
 **العربية**
 - إصلاح «تعذّر الاتصال بالخادم»: تحويل رابط Web App إلى الشكل العام `/macros/s/.../exec` بدل الشكل المقيّد بالنطاق `/a/macros/sr.edu.sa/.../exec` الذي يكسر نداء المتصفح من GitHub. الأمان يبقى محفوظاً عبر التحقق من رمز Google ونطاق `@sr.edu.sa` داخل `Code.gs` (يتطلّب ضبط صلاحية النشر على "Anyone").
