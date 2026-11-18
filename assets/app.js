@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 var CFG = window.RDT_CONFIG || {};
-var CATEGORIES = ["قاعات المحاضرات","قاعات الاختبار","القاعات الدراسية","الفصول الدراسية","أخرى"];
+var CATEGORIES = ["قاعات المحاضرات","قاعات الاختبار","القاعات الدراسية","الفصول الدراسية","قاعات الاجتماعات","أخرى"];
 var state = { rooms:[], cat:"الكل", isAdmin:false, email:"", credential:"", photos:[], devices:[] };
 
 var $ = function(s,r){return (r||document).querySelector(s);};
@@ -179,7 +179,7 @@ function render(){
       +'</div>'
       +'<div class="body"><p class="title">'+esc(r.RoomName)+'</p>'
       +'<div class="meta">'
-        +'<span>'+ICN.pin+esc(r.Building)+'</span>'
+        +'<span>'+ICN.pin+esc(r.Building)+(r.Floor?' · الدور '+esc(r.Floor):'')+'</span>'
         +'<span>'+ICN.users+esc(r.Capacity||"-")+'</span>'
         +'<span>'+esc(r.Gender)+'</span>'
         +'<span class="pill '+(on?'on':'off')+'">'+esc(r.Status)+'</span>'
@@ -201,7 +201,7 @@ function openDetail(id){
   html+='<div class="detail-grid">'
     +cell("المعرّف",r.RoomID)+cell("التصنيف",r.Category)
     +cell("النوع (المصدر)",r.SourceType)+cell("المبنى",r.Building)
-    +cell("السعة",r.Capacity)+cell("الفئة",r.Gender)
+    +cell("الدور",r.Floor)+cell("السعة",r.Capacity)+cell("الفئة",r.Gender)
     +cell("الحالة",r.Status)+cell("آخر تحديث",(r.UpdatedAt||"-"))
   +'</div>';
   html+='<div class="section-title">'+ICN.cpu+'الأجهزة والتقنيات ('+devices.length+')</div>';
@@ -234,7 +234,7 @@ function openForm(r){
   f.RoomID.value=r.RoomID||""; f.RoomName.value=r.RoomName||"";
   f.Category.value=r.Category||CATEGORIES[0]; f.SourceType.value=r.SourceType||"";
   f.Gender.value=r.Gender||"طلاب"; f.Building.value=r.Building||"";
-  f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
+  f.Floor.value=r.Floor||""; f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
   f.Specs.value=r.Specs||""; f.Notes.value=r.Notes||"";
   state.devices = parseDevices(r.Devices);
   renderDevices();
@@ -311,7 +311,7 @@ function saveRoom(e){
   if(bad.length){ toast("اسم الجهاز مطلوب لكل جهاز"); return; }
   var room={ RoomID:f.RoomID.value, RoomName:f.RoomName.value.trim(), Category:f.Category.value,
     SourceType:f.SourceType.value.trim(), Gender:f.Gender.value, Building:f.Building.value.trim(),
-    Capacity:f.Capacity.value.trim(), Status:f.Status.value,
+    Floor:f.Floor.value.trim(), Capacity:f.Capacity.value.trim(), Status:f.Status.value,
     Devices: devices.length? JSON.stringify(devices) : "",
     Specs:f.Specs.value.trim(), Notes:f.Notes.value.trim(), PhotoURLs: state.photos.join("\n") };
   if(!room.RoomName){ toast("اسم القاعة مطلوب"); return; }

@@ -1,6 +1,6 @@
 /*  SRU Rooms Digital Twin — Backend (Google Apps Script Web App)
     منصة التوأم الرقمي للقاعات — الخادم
-    Version: 1.5
+    Version: 1.6
     Backend  : Google Sheet (tabs: Rooms, AccessLog)
     Security : Google sign-in restricted to @sr.edu.sa (verified server-side)
     Photos   : uploaded to a Drive folder, URL stored in the Rooms sheet
@@ -16,7 +16,7 @@ var GOOGLE_CLIENT_ID = '896692416298-hko0aqav5fdimaahujg83a4btpi83vde.apps.googl
 var ADMIN_EMAILS   = ['m.elmahdy@sr.edu.sa'];     // who may add / edit rooms
 // ==============================================================
 
-var ROOM_COLS = ['RoomID','RoomName','Category','SourceType','Gender','Building',
+var ROOM_COLS = ['RoomID','RoomName','Category','SourceType','Gender','Building','Floor',
                  'Capacity','Status','Devices','Specs','PhotoURLs','Notes','UpdatedBy','UpdatedAt'];
 var LOG_COLS  = ['Email','Date','Time','Action','Platform'];
 var PLATFORM  = 'Rooms Digital Twin';
@@ -28,6 +28,14 @@ function sheet_(name, cols){
   var sh = ss.getSheetByName(name);
   if(!sh){ sh = ss.insertSheet(name); sh.appendRow(cols); sh.setFrozenRows(1); }
   return sh;
+}
+
+// Append any ROOM_COLS missing from the header (safe migration; never touches data).
+function ensureCols_(sh){
+  var lastCol = Math.max(sh.getLastColumn(), 1);
+  var header = sh.getRange(1,1,1,lastCol).getValues()[0];
+  var missing = ROOM_COLS.filter(function(c){ return header.indexOf(c) < 0; });
+  if(missing.length){ sh.getRange(1, lastCol+1, 1, missing.length).setValues([missing]); }
 }
 
 // ---- entry points -------------------------------------------
@@ -94,6 +102,7 @@ function isAdmin_(email){
 // ---- rooms --------------------------------------------------
 function listRooms_(){
   var sh = sheet_('Rooms', ROOM_COLS);
+  ensureCols_(sh);
   var values = sh.getDataRange().getValues();
   if(values.length < 2) return [];
   var head = values[0];
@@ -109,6 +118,7 @@ function listRooms_(){
 
 function saveRoom_(room, email){
   var sh = sheet_('Rooms', ROOM_COLS);
+  ensureCols_(sh);
   var values = sh.getDataRange().getValues();
   var head = values[0];
   var idIdx = head.indexOf('RoomID');
@@ -122,12 +132,17 @@ function saveRoom_(room, email){
   }
   room.UpdatedBy = email;
   room.UpdatedAt = nowStr_();
-  var rowArr = ROOM_COLS.map(function(c){ return room[c]!=null ? room[c] : ''; });
 
+  // find existing row
   var found = -1;
   for(var i=1;i<values.length;i++){ if(String(values[i][idIdx]) === String(room.RoomID)){ found = i+1; break; } }
-  if(found > 0) sh.getRange(found,1,1,ROOM_COLS.length).setValues([rowArr]);
-  else          sh.appendRow(rowArr);
+
+  // build row by HEADER position (robust to appended columns); keep existing cells for untouched columns
+  var base = found > 0 ? values[found-1].slice() : head.map(function(){ return ''; });
+  head.forEach(function(colName, idx){ if(room[colName] !== undefined) base[idx] = room[colName]; });
+
+  if(found > 0) sh.getRange(found,1,1,head.length).setValues([base]);
+  else          sh.appendRow(base);
   return room;
 }
 

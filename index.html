@@ -59,9 +59,11 @@
     <input class="search" id="q" type="search" placeholder="بحث: اسم القاعة، مبنى، جهاز…">
     <select id="fBuilding"><option value="">كل المباني</option></select>
     <select id="fGender">
-      <option value="">الجميع</option>
+      <option value="">كل الفئات</option>
       <option value="طلاب">طلاب</option>
       <option value="طالبات">طالبات</option>
+      <option value="اداريين">اداريين</option>
+      <option value="أعضاء هيئة التدريس">أعضاء هيئة التدريس</option>
     </select>
     <select id="fStatus">
       <option value="">كل الحالات</option>
@@ -81,7 +83,7 @@
   <div class="wrap">
     <a class="itoc" id="itoc-link" href="#" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
     <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    <span class="vbadge">Rooms Digital Twin · v1.5</span>
+    <span class="vbadge">Rooms Digital Twin · v1.6</span>
   </div>
 </footer>
 
@@ -114,12 +116,17 @@
           <div class="field"><label>التصنيف</label>
             <select name="Category">
               <option>قاعات المحاضرات</option><option>قاعات الاختبار</option>
-              <option>القاعات الدراسية</option><option>الفصول الدراسية</option><option>أخرى</option>
+              <option>القاعات الدراسية</option><option>الفصول الدراسية</option>
+              <option>قاعات الاجتماعات</option><option>أخرى</option>
             </select></div>
           <div class="field"><label>النوع (المصدر)</label><input name="SourceType" placeholder="Lecture Hall / Lab …"></div>
           <div class="field"><label>المبنى</label><input name="Building"></div>
+          <div class="field"><label>الدور</label><input name="Floor" placeholder="مثال: الأرضي / الأول / الثاني"></div>
           <div class="field"><label>الفئة</label>
-            <select name="Gender"><option>طلاب</option><option>طالبات</option></select></div>
+            <select name="Gender">
+              <option>طلاب</option><option>طالبات</option>
+              <option>اداريين</option><option>أعضاء هيئة التدريس</option>
+            </select></div>
           <div class="field"><label>السعة</label><input name="Capacity" type="number" min="0"></div>
           <div class="field"><label>الحالة</label>
             <select name="Status"><option>نشطة</option><option>غير نشطة</option></select></div>

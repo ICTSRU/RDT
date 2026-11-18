@@ -172,7 +172,7 @@ a{color:var(--blue);text-decoration:none}
 .appfooter{color:#fff;margin-top:30px}
 .appfooter .wrap{max-width:1200px;margin:0 auto;padding:18px 22px;display:flex;
   align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.appfooter .itoc img{height:34px}
+.appfooter .itoc img{height:30px;background:#fff;padding:6px 12px;border-radius:10px;box-sizing:content-box;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .appfooter .vbadge{background:rgba(255,255,255,.16);border-radius:999px;padding:4px 12px;
   font-size:12px;font-weight:700;direction:ltr}
 .appfooter .mid{font-size:12px;opacity:.85;text-align:center;flex:1;min-width:160px}

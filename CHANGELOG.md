@@ -3,6 +3,19 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.6] — 2026-11-18
+**العربية**
+- تصحيح شعار ITOC في تذييل الصفحة الداخلية (خلفية بيضاء مستديرة ليظهر فوق الخلفية الداكنة).
+- إضافة تصنيف **«قاعات الاجتماعات»** إلى التبويبات ونموذج الإضافة/التعديل.
+- إضافة خانة **«الدور»** لكل قاعة (نموذج + صفحة التفاصيل + بطاقة القاعة)، مع ترحيل آمن للعمود في Google Sheet تلقائياً دون المساس بالبيانات.
+- إضافة **«اداريين»** و**«أعضاء هيئة التدريس»** إلى حقل الفئة وفلتر البحث.
+
+**English**
+- Fixed the ITOC logo in the internal-page footer (white rounded backdrop for legibility on the dark footer).
+- Added a **"Meeting Halls"** category to the tabs and the add/edit form.
+- Added a **"Floor"** field per room (form + detail + card), with safe automatic column migration in the Google Sheet that never touches existing data.
+- Added **"Administrators"** and **"Faculty"** to the occupant-category field and the filter.
+
 ## [1.5] — 2026-11-18
 **العربية**
 - تفعيل الدخول الموحّد (SSO) التلقائي: `auto_select` + One-Tap، فإن كانت جلسة Google نشطة في المتصفح (مثل من دخل ITOC) يدخل المستخدم مباشرة دون زرّ أو اختيار حساب. شاشة التحقق بخطوتين تبقى من Google وتظهر فقط عند غياب جلسة Google.
