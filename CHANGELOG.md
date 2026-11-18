@@ -3,6 +3,15 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.2] — 2026-11-18
+**العربية**
+- ربط الخادم بالمعرّفات الفعلية: `SHEET_ID` (شيت القاعات) و `PHOTO_FOLDER_ID` (مجلد صور القاعات) و `GOOGLE_CLIENT_ID`.
+- إضافة خط النشر التلقائي `.github/workflows/deploy.yml` (clasp) باستخدام أسرار المستودع `CLASPRC_JSON · SCRIPT_ID · DEPLOYMENT_ID`؛ النشر بـ `-i DEPLOYMENT_ID` يُبقي رابط Web App ثابتاً.
+
+**English**
+- Wired the backend to live IDs: `SHEET_ID`, `PHOTO_FOLDER_ID`, `GOOGLE_CLIENT_ID`.
+- Added `.github/workflows/deploy.yml` (clasp auto-deploy) using repo secrets `CLASPRC_JSON · SCRIPT_ID · DEPLOYMENT_ID`; `-i DEPLOYMENT_ID` keeps the Web App URL constant.
+
 ## [1.1] — 2026-11-18
 **العربية**
 - إعادة تصميم إدخال الأجهزة: يُضاف كل جهاز على حدة بحقول **اسم الجهاز · الموديل · عنوان IP**، مع إمكانية إضافة **مواصفات أخرى** (مفتاح/قيمة) لكل جهاز.
