@@ -3,6 +3,13 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.9] — 2026-11-18
+**العربية**
+- إضافة كسر تخزين مؤقّت (cache-busting) بإلحاق `?v=1.9` بملفات `config.js` و `app.js` و CSS، فيُجبر المتصفح/شبكة GitHub على تحميل أحدث `config.js` (برابط النشرة العامة) بدل نسخة قديمة مخزَّنة — وهو السبب الأرجح لاستمرار خطأ CORS بعد تحديث الرابط.
+
+**English**
+- Added cache-busting (`?v=1.9` on `config.js`, `app.js`, CSS) so the browser/GitHub CDN always loads the newest `config.js` (with the public deployment URL) instead of a stale cached copy — the most likely reason the CORS error persisted after the URL fix.
+
 ## [1.8] — 2026-11-18
 **العربية**
 - تحديث رابط Web App في `config.js` إلى نشرة جديدة بصلاحية «Anyone» (صيغة `/macros/s/…/exec`) — هذا يحسم مشكلة «تعذّر الاتصال بالخادم».
