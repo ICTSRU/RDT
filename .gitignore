@@ -1,0 +1,8 @@
+# keep the real config out of the repo if it ever holds non-public values.
+# NOTE: API_URL and GOOGLE_CLIENT_ID are not secrets; remove the line below
+# if you prefer to commit config.js so GitHub Pages serves it.
+# config.js
+
+.DS_Store
+node_modules/
+.clasp.json

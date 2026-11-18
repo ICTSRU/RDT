@@ -1,0 +1,41 @@
+# Auto-deploy the Apps Script backend from GitHub using clasp.
+# Mirrors the ICTSRU auto-deploy pattern (SOP template, DCDT, NetPulse…).
+# Required repo secrets:
+#   CLASPRC_JSON  = full contents of ~/.clasprc.json (clasp login credentials)
+#   SCRIPT_ID     = the Apps Script project's Script ID
+#   DEPLOYMENT_ID = the existing Web App deployment ID (so the /exec URL stays constant)
+name: Deploy Apps Script
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ "apps-script/**" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Write clasp credentials
+        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+
+      - name: Write project config
+        run: |
+          cat > apps-script/.clasp.json <<EOF
+          {"scriptId":"${{ secrets.SCRIPT_ID }}","rootDir":"."}
+          EOF
+
+      - name: Push code to Apps Script
+        working-directory: apps-script
+        run: clasp push -f
+
+      - name: Update the existing Web App deployment (keeps the same URL)
+        working-directory: apps-script
+        run: clasp deploy -i "${{ secrets.DEPLOYMENT_ID }}" -d "Auto-deploy ${{ github.sha }}"
