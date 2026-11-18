@@ -3,6 +3,15 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.3] — 2026-11-18
+**العربية**
+- إصلاح رسالة «تعذّر تحميل خدمة تسجيل الدخول»: أصبح النظام ينتظر تحميل مكتبة Google (GIS) غير المتزامنة (حتى ٦ ثوانٍ) قبل إظهار الزر، مع زر «إعادة المحاولة» عند الفشل.
+- تصحيح شكل شعار ITOC في شاشة الدخول: وُضع على خلفية بيضاء مستديرة ليظهر بوضوح فوق التدرّج البنفسجي.
+
+**English**
+- Fixed the "sign-in service failed to load" message: the app now waits for the async Google Identity Services library (up to 6s) before showing the button, with a Retry button on failure.
+- Fixed the ITOC logo on the sign-in screen: placed on a white rounded backdrop so it reads clearly over the purple gradient.
+
 ## [1.2] — 2026-11-18
 **العربية**
 - ربط الخادم بالمعرّفات الفعلية: `SHEET_ID` (شيت القاعات) و `PHOTO_FOLDER_ID` (مجلد صور القاعات) و `GOOGLE_CLIENT_ID`.

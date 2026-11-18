@@ -40,17 +40,31 @@ function api(action,payload){
 }
 
 // ===== SIGN-IN GATE (ITOC) ==========================================
+function gisReady(){ return !!(window.google && google.accounts && google.accounts.id); }
+
 function initGate(){
   $("#gate-domain").textContent = "@"+(CFG.ALLOWED_DOMAIN||"sr.edu.sa");
-  if(!CFG.GOOGLE_CLIENT_ID || !window.google){
-    // offline / demo mode: allow entering without Google (read-only seed)
-    $("#gate-err").textContent = CFG.GOOGLE_CLIENT_ID ? "تعذّر تحميل خدمة تسجيل الدخول من Google." :
-      "وضع العرض: لم يُضبط معرّف Google بعد — سيتم عرض البيانات التجريبية فقط.";
-    var b=document.createElement("button");b.className="btn btn-primary";b.textContent="دخول وضع العرض";
-    b.onclick=function(){ enterApp("demo@"+(CFG.ALLOWED_DOMAIN||"sr.edu.sa"),false,true); };
-    $("#gate-btn").appendChild(b);
+  if(!CFG.GOOGLE_CLIENT_ID){ showDemoEntry("وضع العرض: لم يُضبط معرّف Google بعد — ستُعرض البيانات التجريبية فقط."); return; }
+  waitForGIS(0);
+}
+
+// The GIS library loads async; poll until it is ready instead of failing immediately.
+function waitForGIS(n){
+  if(gisReady()){ setupGIS(); return; }
+  if(n >= 40){   // ~6s elapsed
+    $("#gate-err").textContent = "تعذّر تحميل خدمة تسجيل الدخول من Google. تحقّق من اتصال الإنترنت ثم أعد المحاولة.";
+    var r=document.createElement("button"); r.className="btn btn-primary"; r.textContent="إعادة المحاولة";
+    r.onclick=function(){ location.reload(); };
+    $("#gate-btn").innerHTML=""; $("#gate-btn").appendChild(r);
     return;
   }
+  $("#gate-err").textContent = "جارٍ تحميل خدمة تسجيل الدخول…";
+  setTimeout(function(){ waitForGIS(n+1); }, 150);
+}
+
+function setupGIS(){
+  $("#gate-err").textContent = "";
+  $("#gate-btn").innerHTML = "";
   google.accounts.id.initialize({
     client_id: CFG.GOOGLE_CLIENT_ID,
     hd: CFG.ALLOWED_DOMAIN,                 // hint: restrict to the institution domain
@@ -58,6 +72,13 @@ function initGate(){
   });
   google.accounts.id.renderButton($("#gate-btn"),
     {theme:"filled_blue",size:"large",shape:"pill",text:"signin_with",locale:"ar",width:260});
+}
+
+function showDemoEntry(msg){
+  $("#gate-err").textContent = msg;
+  var b=document.createElement("button");b.className="btn btn-primary";b.textContent="دخول وضع العرض";
+  b.onclick=function(){ enterApp("demo@"+(CFG.ALLOWED_DOMAIN||"sr.edu.sa"),false,true); };
+  $("#gate-btn").innerHTML=""; $("#gate-btn").appendChild(b);
 }
 
 function onCredential(resp){

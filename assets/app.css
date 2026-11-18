@@ -157,7 +157,8 @@ a{color:var(--blue);text-decoration:none}
 .gate .card2{background:#fff;border-radius:16px;max-width:430px;width:100%;overflow:hidden;
   box-shadow:0 20px 60px rgba(36,20,54,.35)}
 .gate .top{color:#fff;padding:26px 24px;text-align:center}
-.gate .top .itoc{height:54px;margin-bottom:10px}
+.gate .top .itoc{height:48px;width:auto;margin-bottom:14px;background:#fff;
+  padding:10px 18px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.18);box-sizing:content-box}
 .gate .top h2{margin:0;font-size:20px;font-weight:800}
 .gate .body2{padding:24px;text-align:center}
 .gate .body2 p{color:var(--muted);font-size:14px;margin:0 0 6px}
