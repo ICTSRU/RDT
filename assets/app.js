@@ -3,7 +3,7 @@
 "use strict";
 var CFG = window.RDT_CONFIG || {};
 var CATEGORIES = ["قاعات المحاضرات","قاعات الاختبار","القاعات الدراسية","الفصول الدراسية","أخرى"];
-var state = { rooms:[], cat:"الكل", isAdmin:false, email:"", credential:"", photos:[] };
+var state = { rooms:[], cat:"الكل", isAdmin:false, email:"", credential:"", photos:[], devices:[] };
 
 var $ = function(s,r){return (r||document).querySelector(s);};
 var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
@@ -12,6 +12,17 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
 function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");
   clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},2200);}
 function splitList(s){return String(s||"").split(/[\n،,|]+/).map(function(x){return x.trim();}).filter(Boolean);}
+
+// Devices are stored as a JSON array in the Devices column:
+//   [{name, model, ip, specs:[[key,value],...]}]
+// Legacy rooms (comma/line separated names) are read transparently.
+function normDev(d){ d=d||{}; return {name:d.name||"", model:d.model||"", ip:d.ip||"",
+  specs: Array.isArray(d.specs)? d.specs.filter(function(p){return p&&p.length;}) : []}; }
+function parseDevices(s){
+  s=String(s||"").trim(); if(!s) return [];
+  if(s.charAt(0)==="["){ try{var a=JSON.parse(s); if(Array.isArray(a)) return a.map(normDev);}catch(e){} }
+  return splitList(s).map(function(n){return {name:n,model:"",ip:"",specs:[]};});
+}
 
 // ---- logos with text fallback ----
 function wireLogo(img,url,txt){
@@ -133,7 +144,7 @@ function render(){
   $("#count").textContent=list.length+" قاعة";
   if(!list.length){ $("#grid").innerHTML='<div class="empty">لا توجد قاعات مطابقة.</div>'; return; }
   $("#grid").innerHTML=list.map(function(r){
-    var photo=firstPhoto(r), dev=splitList(r.Devices).length;
+    var photo=firstPhoto(r), dev=parseDevices(r.Devices).length;
     var on=r.Status==="نشطة";
     return '<div class="card" data-id="'+esc(r.RoomID)+'">'
       +'<div class="thumb"'+(photo?' style="background-image:url(\''+esc(photo)+'\')"':'')+'>'
@@ -155,7 +166,7 @@ function render(){
 // ---- room detail ----
 function openDetail(id){
   var r=state.rooms.filter(function(x){return x.RoomID===id;})[0]; if(!r) return;
-  var photos=splitList(r.PhotoURLs), devices=splitList(r.Devices), specs=parseSpecs(r.Specs);
+  var photos=splitList(r.PhotoURLs), devices=parseDevices(r.Devices);
   $("#detailHead").className="mhead sru-tech-bg";
   $("#detailTitle").textContent=r.RoomName;
   var html="";
@@ -168,13 +179,18 @@ function openDetail(id){
     +cell("السعة",r.Capacity)+cell("الفئة",r.Gender)
     +cell("الحالة",r.Status)+cell("آخر تحديث",(r.UpdatedAt||"-"))
   +'</div>';
-  html+='<div class="section-title">'+ICN.cpu+'الأجهزة والتقنيات</div>';
-  html+= devices.length? '<div class="devices">'+devices.map(function(d){return '<span class="chip">'+esc(d)+'</span>';}).join("")+'</div>'
-                       : '<div class="hint">لم تُسجّل أجهزة لهذه القاعة بعد.</div>';
-  if(specs.length){
-    html+='<div class="section-title">'+ICN.list+'المواصفات التفصيلية</div><table class="specs-table"><tbody>'
-      +specs.map(function(s){return '<tr><td>'+esc(s[0])+'</td><td>'+esc(s[1])+'</td></tr>';}).join("")+'</tbody></table>';
-  }
+  html+='<div class="section-title">'+ICN.cpu+'الأجهزة والتقنيات ('+devices.length+')</div>';
+  if(devices.length){
+    html+= devices.map(function(d){
+      var rows='';
+      if(d.model) rows+='<tr><td>الموديل</td><td>'+esc(d.model)+'</td></tr>';
+      if(d.ip)    rows+='<tr><td>عنوان IP</td><td><span class="en">'+esc(d.ip)+'</span></td></tr>';
+      (d.specs||[]).forEach(function(p){ if(p[0]||p[1]) rows+='<tr><td>'+esc(p[0])+'</td><td>'+esc(p[1])+'</td></tr>'; });
+      return '<div class="dev-card"><div class="dev-head">'+ICN.cpu+'<span>'+esc(d.name||"جهاز")+'</span></div>'
+        +(rows? '<table class="specs-table"><tbody>'+rows+'</tbody></table>' : '<div class="hint">لا توجد مواصفات مسجّلة.</div>')
+        +'</div>';
+    }).join("");
+  } else { html+='<div class="hint">لم تُسجّل أجهزة لهذه القاعة بعد.</div>'; }
   if(r.Notes){ html+='<div class="section-title">'+ICN.note+'ملاحظات</div><div class="hint">'+esc(r.Notes)+'</div>'; }
   $("#detailBody").innerHTML=html;
   $("#detailEdit").classList.toggle("hidden",!state.isAdmin);
@@ -194,11 +210,49 @@ function openForm(r){
   f.Category.value=r.Category||CATEGORIES[0]; f.SourceType.value=r.SourceType||"";
   f.Gender.value=r.Gender||"طلاب"; f.Building.value=r.Building||"";
   f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
-  f.Devices.value=r.Devices||""; f.Specs.value=r.Specs||""; f.Notes.value=r.Notes||"";
+  f.Specs.value=r.Specs||""; f.Notes.value=r.Notes||"";
+  state.devices = parseDevices(r.Devices);
+  renderDevices();
   $("#formTitle").textContent = r.RoomID? ("تعديل: "+r.RoomName) : "إضافة قاعة جديدة";
   renderThumbs();
   openModal("formModal");
 }
+
+// ---- device editor ----
+function renderDevices(){
+  var host=$("#devicesEditor");
+  if(!state.devices.length){ host.innerHTML='<div class="hint">لا توجد أجهزة بعد — اضغط «إضافة جهاز».</div>'; return; }
+  host.innerHTML = state.devices.map(function(d,i){
+    var specs=(d.specs||[]).map(function(p,j){
+      return '<div class="spec-row">'
+        +'<input placeholder="المواصفة (مثال: الدقة)" data-dev="'+i+'" data-spec="'+j+'" data-k="k" value="'+esc(p[0]||"")+'">'
+        +'<input placeholder="القيمة (مثال: 1920×1080)" data-dev="'+i+'" data-spec="'+j+'" data-k="v" value="'+esc(p[1]||"")+'">'
+        +'<button type="button" class="mini-del" data-rmspec="'+i+'_'+j+'">×</button></div>';
+    }).join("");
+    return '<div class="dev-edit">'
+      +'<div class="dev-edit-top">'
+        +'<input class="dev-name" placeholder="اسم الجهاز *" data-dev="'+i+'" data-k="name" value="'+esc(d.name)+'">'
+        +'<input placeholder="الموديل" data-dev="'+i+'" data-k="model" value="'+esc(d.model)+'">'
+        +'<input placeholder="عنوان IP" dir="ltr" data-dev="'+i+'" data-k="ip" value="'+esc(d.ip)+'">'
+        +'<button type="button" class="dev-del" data-rmdev="'+i+'">حذف الجهاز</button>'
+      +'</div>'
+      +'<div class="specs-wrap">'+specs+'</div>'
+      +'<button type="button" class="btn-link" data-addspec="'+i+'">＋ مواصفة أخرى</button>'
+    +'</div>';
+  }).join("");
+  // wire inputs
+  $$("#devicesEditor input").forEach(function(el){
+    el.addEventListener("input",function(){
+      var i=+el.dataset.dev;
+      if(el.dataset.spec!=null){ var j=+el.dataset.spec, k=el.dataset.k==="k"?0:1; state.devices[i].specs[j][k]=el.value; }
+      else { state.devices[i][el.dataset.k]=el.value; }
+    });
+  });
+  $$("#devicesEditor [data-rmdev]").forEach(function(b){b.onclick=function(){state.devices.splice(+b.dataset.rmdev,1);renderDevices();};});
+  $$("#devicesEditor [data-addspec]").forEach(function(b){b.onclick=function(){var i=+b.dataset.addspec;state.devices[i].specs.push(["",""]);renderDevices();};});
+  $$("#devicesEditor [data-rmspec]").forEach(function(b){b.onclick=function(){var p=b.dataset.rmspec.split("_");state.devices[+p[0]].specs.splice(+p[1],1);renderDevices();};});
+}
+function addDevice(){ state.devices.push({name:"",model:"",ip:"",specs:[]}); renderDevices(); }
 function renderThumbs(){
   $("#photoThumbs").innerHTML=state.photos.map(function(u,i){
     return '<div class="t"><img src="'+esc(u)+'"><button type="button" data-i="'+i+'">×</button></div>';}).join("");
@@ -224,9 +278,16 @@ function handleUpload(input){
 function saveRoom(e){
   e.preventDefault();
   var f=$("#roomForm");
+  var devices = state.devices
+    .map(function(d){ return {name:(d.name||"").trim(), model:(d.model||"").trim(), ip:(d.ip||"").trim(),
+        specs:(d.specs||[]).map(function(p){return [(p[0]||"").trim(),(p[1]||"").trim()];}).filter(function(p){return p[0]||p[1];})}; })
+    .filter(function(d){ return d.name||d.model||d.ip||d.specs.length; });
+  var bad=devices.filter(function(d){return !d.name;});
+  if(bad.length){ toast("اسم الجهاز مطلوب لكل جهاز"); return; }
   var room={ RoomID:f.RoomID.value, RoomName:f.RoomName.value.trim(), Category:f.Category.value,
     SourceType:f.SourceType.value.trim(), Gender:f.Gender.value, Building:f.Building.value.trim(),
-    Capacity:f.Capacity.value.trim(), Status:f.Status.value, Devices:f.Devices.value.trim(),
+    Capacity:f.Capacity.value.trim(), Status:f.Status.value,
+    Devices: devices.length? JSON.stringify(devices) : "",
     Specs:f.Specs.value.trim(), Notes:f.Notes.value.trim(), PhotoURLs: state.photos.join("\n") };
   if(!room.RoomName){ toast("اسم القاعة مطلوب"); return; }
   if(!CFG.API_URL){ toast("الحفظ يتطلب ضبط الخادم (Apps Script)."); return; }
@@ -269,6 +330,7 @@ function boot(){
   ["q","fBuilding","fGender","fStatus"].forEach(function(id){
     var el=$("#"+id); el.addEventListener(id==="q"?"input":"change",render);});
   $("#addRoomBtn").onclick=function(){openForm(null);};
+  $("#addDeviceBtn").onclick=addDevice;
   $("#roomForm").addEventListener("submit",saveRoom);
   $("#photoInput").addEventListener("change",function(){handleUpload(this);});
   $("#signout").onclick=function(){ if(window.google&&google.accounts){google.accounts.id.disableAutoSelect();} location.reload(); };

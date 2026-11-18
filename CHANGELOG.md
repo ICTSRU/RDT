@@ -3,6 +3,17 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.1] — 2026-11-18
+**العربية**
+- إعادة تصميم إدخال الأجهزة: يُضاف كل جهاز على حدة بحقول **اسم الجهاز · الموديل · عنوان IP**، مع إمكانية إضافة **مواصفات أخرى** (مفتاح/قيمة) لكل جهاز.
+- صفحة تفاصيل القاعة تعرض كل جهاز كبطاقة مستقلة بجدول مواصفاته.
+- تُخزَّن الأجهزة كمصفوفة JSON في نفس عمود `Devices` (لا تغيير في بنية Google Sheet)، مع قراءة متوافقة للبيانات القديمة.
+
+**English**
+- Reworked device entry: each device added individually with **name · model · IP address**, plus optional **extra specs** (key/value) per device.
+- Room detail shows each device as its own card with a specs table.
+- Devices stored as a JSON array in the same `Devices` column (no Sheet schema change); legacy values still read correctly.
+
 ## [1.0] — 2026-11-18
 النسخة الأولى. / Initial release.
 

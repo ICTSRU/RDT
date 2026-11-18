@@ -81,7 +81,7 @@
   <div class="wrap">
     <a class="itoc" id="itoc-link" href="#" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
     <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    <span class="vbadge">Rooms Digital Twin · v1.0</span>
+    <span class="vbadge">Rooms Digital Twin · v1.1</span>
   </div>
 </footer>
 
@@ -123,12 +123,13 @@
           <div class="field"><label>السعة</label><input name="Capacity" type="number" min="0"></div>
           <div class="field"><label>الحالة</label>
             <select name="Status"><option>نشطة</option><option>غير نشطة</option></select></div>
-          <div class="field full"><label>الأجهزة والتقنيات</label>
-            <textarea name="Devices" placeholder="افصل بين الأجهزة بفاصلة أو سطر — مثال: بروجكتر Epson، سبورة ذكية 75 بوصة، نظام صوت، كاميرا، 30 جهاز حاسب"></textarea>
-            <span class="hint">كل جهاز يظهر كوسم مستقل في صفحة القاعة.</span></div>
-          <div class="field full"><label>المواصفات التفصيلية</label>
-            <textarea name="Specs" placeholder="سطر لكل مواصفة بصيغة  المفتاح: القيمة — مثال:&#10;البروجكتر: Epson EB-2250U&#10;دقة الشاشة: 1920×1080&#10;نقطة شبكة: 2"></textarea>
-            <span class="hint">تُعرض كجدول مواصفات (المفتاح: القيمة).</span></div>
+          <input type="hidden" name="Specs">
+          <div class="field full">
+            <label>الأجهزة والتقنيات — كل جهاز على حدة</label>
+            <div id="devicesEditor"></div>
+            <button type="button" class="btn btn-secondary" id="addDeviceBtn" style="margin-top:8px">＋ إضافة جهاز</button>
+            <span class="hint">لكل جهاز: الاسم، الموديل، عنوان IP، مع إمكانية إضافة مواصفات أخرى (مفتاح/قيمة).</span>
+          </div>
           <div class="field full"><label>الصور الحقيقية</label>
             <div class="upload-row">
               <input type="file" id="photoInput" accept="image/*">
