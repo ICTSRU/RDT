@@ -3,6 +3,15 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [1.8] — 2026-11-18
+**العربية**
+- تحديث رابط Web App في `config.js` إلى نشرة جديدة بصلاحية «Anyone» (صيغة `/macros/s/…/exec`) — هذا يحسم مشكلة «تعذّر الاتصال بالخادم».
+- ملاحظة تشغيلية: يجب تحديث سرّ المستودع `DEPLOYMENT_ID` إلى معرّف النشرة الجديدة ليستمر النشر التلقائي على النشرة العامة نفسها.
+
+**English**
+- Updated the Web App URL in `config.js` to a new "Anyone"-access deployment (`/macros/s/…/exec`) — this resolves the "server connection failed" error.
+- Ops note: repo secret `DEPLOYMENT_ID` must be updated to the new deployment ID so auto-deploy keeps targeting the public deployment.
+
 ## [1.7] — 2026-11-18
 **العربية**
 - رسائل خطأ دقيقة عند فشل الاتصال بالخادم: تمييز «رد الخادم بصفحة دخول (النشر ليس Anyone)» عن أخطاء الوصول/CORS، بدل رسالة «تعذّر الاتصال بالخادم» العامة. (الحل الجذري: ضبط صلاحية نشر Apps Script على «Anyone».)
