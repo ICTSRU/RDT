@@ -2,7 +2,7 @@
     Left empty here so the page runs in demo mode (seed data, read-only).      */
 window.RDT_CONFIG = {
   API_URL: "https://script.google.com/a/macros/sr.edu.sa/s/AKfycbyeMSCshetc4wQMAaV-7tRym2obEyxdclzAKGRLiLCn3Nly6ZUaOtB-H6fmMq2g7anJ/exec",
-  GOOGLE_CLIENT_ID: "",
+  GOOGLE_CLIENT_ID: "896692416298-hko0aqav5fdimaahujg83a4btpi83vde.apps.googleusercontent.com",
   ALLOWED_DOMAIN: "sr.edu.sa",
   LOGO_SRU:  "https://ictsru.github.io/brand/assets/logo-sru.png",
   LOGO_ICTD: "https://ictsru.github.io/brand/assets/logo-ictd.png",

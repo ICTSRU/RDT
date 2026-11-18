@@ -12,7 +12,7 @@
 var ALLOWED_DOMAIN = 'sr.edu.sa';                 // only this e-mail domain may sign in
 var SHEET_ID       = '';                          // paste the Google Sheet ID (leave '' to use the bound sheet)
 var PHOTO_FOLDER_ID= '';                          // paste a Drive folder ID for room photos (optional)
-var GOOGLE_CLIENT_ID = '';                        // same OAuth Web client ID used by the front-end
+var GOOGLE_CLIENT_ID = '896692416298-hko0aqav5fdimaahujg83a4btpi83vde.apps.googleusercontent.com'; // same OAuth Web client ID used by the front-end
 var ADMIN_EMAILS   = ['m.elmahdy@sr.edu.sa'];     // who may add / edit rooms
 // ==============================================================
 
