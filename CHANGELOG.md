@@ -3,6 +3,19 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.0] — 2026-11-18
+**العربية — تغيير معماري جذري (حل نهائي لمشكلة الاتصال)**
+- أصبحت المنصة تُقدَّم من Apps Script نفسه عبر `HtmlService` (ملفات `Index.html` / `Style.html` / `Script.html`)، واستُبدل `fetch` بجسر `google.script.run` — فالاتصال الآن **بنفس الأصل تماماً: لا CORS ولا حاجة لوصول مجهول**.
+- الأمان: النشر بصلاحية «Anyone within SRU» (يقصر الدخول على `@sr.edu.sa`)، وتُقرأ هوية المستخدم من الخادم عبر `Session.getActiveUser()`، ويُسجَّل الدخول في `AccessLog`. أُزيل تسجيل دخول Google Identity (لم يعد لازماً).
+- صفحة GitHub صارت صفحة تحويل أنيقة تفتح رابط المنصة على Apps Script.
+- حُدّث `appsscript.json` إلى `access: DOMAIN` ونطاق `userinfo.email`.
+
+**English — radical architecture change (definitive connectivity fix)**
+- The app is now served by Apps Script via `HtmlService` (`Index/Style/Script.html`); `fetch` replaced by the `google.script.run` bridge — calls are **same-origin: no CORS, no anonymous access needed**.
+- Security: deploy as "Anyone within SRU" (restricts to `@sr.edu.sa`); identity read server-side via `Session.getActiveUser()`; sign-ins logged to `AccessLog`. Google Identity sign-in removed (no longer required).
+- The GitHub page is now a styled redirect to the Apps Script app URL.
+- `appsscript.json` set to `access: DOMAIN` with the `userinfo.email` scope.
+
 ## [1.9] — 2026-11-18
 **العربية**
 - إضافة كسر تخزين مؤقّت (cache-busting) بإلحاق `?v=1.9` بملفات `config.js` و `app.js` و CSS، فيُجبر المتصفح/شبكة GitHub على تحميل أحدث `config.js` (برابط النشرة العامة) بدل نسخة قديمة مخزَّنة — وهو السبب الأرجح لاستمرار خطأ CORS بعد تحديث الرابط.

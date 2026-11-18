@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<?!= include('Style'); ?>
+</head>
+<body>
+
+<!-- ITOC branded landing (shown after Google has already authenticated the user) -->
+<div class="gate sru-tech-bg" id="gate">
+  <div class="card2">
+    <div class="top sru-tech-bg">
+      <img class="itoc" id="gate-itoc" src="" alt="ITOC">
+      <h2>التوأم الرقمي للقاعات الدراسية</h2>
+      <div style="font-size:12px;opacity:.9;margin-top:4px">مركز عمليات تقنية المعلومات · ITOC</div>
+    </div>
+    <div class="body2">
+      <p>مرحباً بك في منصة التوأم الرقمي للقاعات</p>
+      <span class="dom" id="gate-email">…</span>
+      <p style="font-size:13px">يُسجَّل دخولك (البريد والتاريخ والوقت) لأغراض الأمن والتدقيق.</p>
+      <div class="gbtn" id="gate-btn"></div>
+      <div class="err" id="gate-err">جارٍ التحقق من هويتك…</div>
+      <div class="foot">جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
+    </div>
+  </div>
+</div>
+
+<div class="brandbar">
+  <img id="logo-ictd" src="" alt="ICTD">
+  <img id="logo-sru" src="" alt="SRU">
+</div>
+
+<header class="appheader sru-tech-bg">
+  <div class="wrap">
+    <div class="mark" id="appMark"></div>
+    <div>
+      <h1>التوأم الرقمي للقاعات الدراسية</h1>
+      <p>استعراض القاعات وتجهيزاتها التقنية — قاعات المحاضرات · الاختبار · الدراسية · الفصول · الاجتماعات</p>
+    </div>
+    <div class="who">
+      <div id="who-email">—</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="tabs" id="tabs"></div>
+  <div class="filters">
+    <input class="search" id="q" type="search" placeholder="بحث: اسم القاعة، مبنى، جهاز…">
+    <select id="fBuilding"><option value="">كل المباني</option></select>
+    <select id="fGender">
+      <option value="">كل الفئات</option>
+      <option value="طلاب">طلاب</option>
+      <option value="طالبات">طالبات</option>
+      <option value="اداريين">اداريين</option>
+      <option value="أعضاء هيئة التدريس">أعضاء هيئة التدريس</option>
+    </select>
+    <select id="fStatus">
+      <option value="">كل الحالات</option>
+      <option value="نشطة">نشطة</option>
+      <option value="غير نشطة">غير نشطة</option>
+    </select>
+    <span class="spacer"></span>
+    <span id="count" class="hint"></span>
+    <button class="btn btn-primary hidden" id="addRoomBtn">＋ إضافة قاعة</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer class="appfooter sru-tech-bg-dark">
+  <div class="wrap">
+    <a class="itoc" id="itoc-link" href="https://ictsru.github.io/ITOC/#forms" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
+    <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
+    <span class="vbadge">Rooms Digital Twin · v2.0</span>
+  </div>
+</footer>
+
+<!-- room detail modal -->
+<div class="modal-bg" id="detailModal">
+  <div class="modal">
+    <div class="mhead sru-tech-bg" id="detailHead">
+      <h2 id="detailTitle"></h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost hidden" id="detailEdit">تعديل</button>
+        <button class="x" data-close="detailModal">×</button>
+      </div>
+    </div>
+    <div class="mbody" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- add / edit modal -->
+<div class="modal-bg" id="formModal">
+  <div class="modal">
+    <div class="mhead sru-tech-bg">
+      <h2 id="formTitle">إضافة قاعة</h2>
+      <button class="x" data-close="formModal">×</button>
+    </div>
+    <div class="mbody">
+      <form id="roomForm">
+        <input type="hidden" name="RoomID">
+        <input type="hidden" name="Specs">
+        <div class="form-grid">
+          <div class="field full"><label>اسم القاعة *</label><input name="RoomName" required></div>
+          <div class="field"><label>التصنيف</label>
+            <select name="Category">
+              <option>قاعات المحاضرات</option><option>قاعات الاختبار</option>
+              <option>القاعات الدراسية</option><option>الفصول الدراسية</option>
+              <option>قاعات الاجتماعات</option><option>أخرى</option>
+            </select></div>
+          <div class="field"><label>النوع (المصدر)</label><input name="SourceType" placeholder="Lecture Hall / Lab …"></div>
+          <div class="field"><label>المبنى</label><input name="Building"></div>
+          <div class="field"><label>الدور</label><input name="Floor" placeholder="مثال: الأرضي / الأول / الثاني"></div>
+          <div class="field"><label>الفئة</label>
+            <select name="Gender">
+              <option>طلاب</option><option>طالبات</option>
+              <option>اداريين</option><option>أعضاء هيئة التدريس</option>
+            </select></div>
+          <div class="field"><label>السعة</label><input name="Capacity" type="number" min="0"></div>
+          <div class="field"><label>الحالة</label>
+            <select name="Status"><option>نشطة</option><option>غير نشطة</option></select></div>
+          <div class="field full">
+            <label>الأجهزة والتقنيات — كل جهاز على حدة</label>
+            <div id="devicesEditor"></div>
+            <button type="button" class="btn btn-secondary" id="addDeviceBtn" style="margin-top:8px">＋ إضافة جهاز</button>
+            <span class="hint">لكل جهاز: الاسم، الموديل، عنوان IP، مع إمكانية إضافة مواصفات أخرى (مفتاح/قيمة).</span>
+          </div>
+          <div class="field full"><label>الصور الحقيقية</label>
+            <div class="upload-row">
+              <input type="file" id="photoInput" accept="image/*">
+              <span class="hint">تُرفع إلى Google Drive وتُحفظ روابطها تلقائياً.</span>
+            </div>
+            <div class="thumbs" id="photoThumbs"></div></div>
+          <div class="field full"><label>ملاحظات</label><textarea name="Notes"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">حفظ</button>
+          <button type="button" class="btn btn-secondary" data-close="formModal">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<?!= include('Script'); ?>
+</body>
+</html>

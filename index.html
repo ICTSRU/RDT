@@ -5,159 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>التوأم الرقمي للقاعات الدراسية — جامعة سليمان الراجحي</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/sru-tech-bg.css?v=1.9">
-<link rel="stylesheet" href="assets/app.css?v=1.9">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="assets/sru-tech-bg.css?v=2.0">
+<style>
+  body{font-family:"Cairo",Tahoma,Arial,sans-serif;direction:rtl;margin:0;background:#f7f5fb;color:#241436;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{background:#fff;border-radius:16px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(36,20,54,.25);text-align:center}
+  .top{color:#fff;padding:28px 24px}
+  .top img{height:46px;background:#fff;padding:9px 16px;border-radius:12px;margin-bottom:12px}
+  .top h1{margin:0;font-size:20px;font-weight:800}
+  .body{padding:26px 24px}
+  .body p{color:#6b5a80;font-size:14px;margin:0 0 18px}
+  a.btn{display:inline-block;background:#501e8c;color:#fff;text-decoration:none;font-weight:700;
+    padding:12px 26px;border-radius:8px;font-size:15px}
+  a.btn:hover{background:#3a1464}
+  .ver{font-size:11px;color:#6b5a80;margin-top:16px;direction:ltr}
+</style>
 </head>
 <body>
-
-<!-- ===== ITOC branded sign-in gate (shown BEFORE Google's own screen) ===== -->
-<div class="gate sru-tech-bg" id="gate">
-  <div class="card2">
+  <div class="box">
     <div class="top sru-tech-bg">
-      <img class="itoc" id="gate-itoc" src="" alt="ITOC">
-      <h2>التوأم الرقمي للقاعات الدراسية</h2>
-      <div style="font-size:12px;opacity:.9;margin-top:4px">مركز عمليات تقنية المعلومات · ITOC</div>
-    </div>
-    <div class="body2">
-      <p>تسجيل الدخول باستخدام البريد الجامعي</p>
-      <span class="dom" id="gate-domain">@sr.edu.sa</span>
-      <p style="font-size:13px">يُسجَّل كل دخول (البريد والتاريخ والوقت) لأغراض الأمن والتدقيق.</p>
-      <div class="gbtn" id="gate-btn"></div>
-      <div class="err" id="gate-err"></div>
-      <div class="foot">جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== brand bar (white): ICTD left · SRU right, 40px ===== -->
-<div class="brandbar">
-  <img id="logo-ictd" src="" alt="ICTD">
-  <img id="logo-sru" src="" alt="SRU">
-</div>
-
-<!-- ===== header band (tech-bg network) ===== -->
-<header class="appheader sru-tech-bg">
-  <div class="wrap">
-    <div class="mark" id="appMark"></div>
-    <div>
+      <img id="itoc" src="assets/logos/logo-itoc.png" alt="ITOC">
       <h1>التوأم الرقمي للقاعات الدراسية</h1>
-      <p>استعراض القاعات وتجهيزاتها التقنية — قاعات المحاضرات · الاختبار · الدراسية · الفصول</p>
     </div>
-    <div class="who">
-      <div id="who-email">—</div>
-      <button class="btn btn-ghost" id="signout">تسجيل الخروج</button>
-    </div>
-  </div>
-</header>
-
-<!-- ===== main ===== -->
-<main class="container">
-  <div class="tabs" id="tabs"></div>
-
-  <div class="filters">
-    <input class="search" id="q" type="search" placeholder="بحث: اسم القاعة، مبنى، جهاز…">
-    <select id="fBuilding"><option value="">كل المباني</option></select>
-    <select id="fGender">
-      <option value="">كل الفئات</option>
-      <option value="طلاب">طلاب</option>
-      <option value="طالبات">طالبات</option>
-      <option value="اداريين">اداريين</option>
-      <option value="أعضاء هيئة التدريس">أعضاء هيئة التدريس</option>
-    </select>
-    <select id="fStatus">
-      <option value="">كل الحالات</option>
-      <option value="نشطة">نشطة</option>
-      <option value="غير نشطة">غير نشطة</option>
-    </select>
-    <span class="spacer"></span>
-    <span id="count" class="hint"></span>
-    <button class="btn btn-primary hidden" id="addRoomBtn">＋ إضافة قاعة</button>
-  </div>
-
-  <div class="grid" id="grid"></div>
-</main>
-
-<!-- ===== footer (tech-bg-dark) ===== -->
-<footer class="appfooter sru-tech-bg-dark">
-  <div class="wrap">
-    <a class="itoc" id="itoc-link" href="#" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
-    <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    <span class="vbadge">Rooms Digital Twin · v1.9</span>
-  </div>
-</footer>
-
-<!-- ===== room detail modal ===== -->
-<div class="modal-bg" id="detailModal">
-  <div class="modal">
-    <div class="mhead sru-tech-bg" id="detailHead">
-      <h2 id="detailTitle"></h2>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost hidden" id="detailEdit">تعديل</button>
-        <button class="x" data-close="detailModal">×</button>
-      </div>
-    </div>
-    <div class="mbody" id="detailBody"></div>
-  </div>
-</div>
-
-<!-- ===== add / edit modal ===== -->
-<div class="modal-bg" id="formModal">
-  <div class="modal">
-    <div class="mhead sru-tech-bg">
-      <h2 id="formTitle">إضافة قاعة</h2>
-      <button class="x" data-close="formModal">×</button>
-    </div>
-    <div class="mbody">
-      <form id="roomForm">
-        <input type="hidden" name="RoomID">
-        <div class="form-grid">
-          <div class="field full"><label>اسم القاعة *</label><input name="RoomName" required></div>
-          <div class="field"><label>التصنيف</label>
-            <select name="Category">
-              <option>قاعات المحاضرات</option><option>قاعات الاختبار</option>
-              <option>القاعات الدراسية</option><option>الفصول الدراسية</option>
-              <option>قاعات الاجتماعات</option><option>أخرى</option>
-            </select></div>
-          <div class="field"><label>النوع (المصدر)</label><input name="SourceType" placeholder="Lecture Hall / Lab …"></div>
-          <div class="field"><label>المبنى</label><input name="Building"></div>
-          <div class="field"><label>الدور</label><input name="Floor" placeholder="مثال: الأرضي / الأول / الثاني"></div>
-          <div class="field"><label>الفئة</label>
-            <select name="Gender">
-              <option>طلاب</option><option>طالبات</option>
-              <option>اداريين</option><option>أعضاء هيئة التدريس</option>
-            </select></div>
-          <div class="field"><label>السعة</label><input name="Capacity" type="number" min="0"></div>
-          <div class="field"><label>الحالة</label>
-            <select name="Status"><option>نشطة</option><option>غير نشطة</option></select></div>
-          <input type="hidden" name="Specs">
-          <div class="field full">
-            <label>الأجهزة والتقنيات — كل جهاز على حدة</label>
-            <div id="devicesEditor"></div>
-            <button type="button" class="btn btn-secondary" id="addDeviceBtn" style="margin-top:8px">＋ إضافة جهاز</button>
-            <span class="hint">لكل جهاز: الاسم، الموديل، عنوان IP، مع إمكانية إضافة مواصفات أخرى (مفتاح/قيمة).</span>
-          </div>
-          <div class="field full"><label>الصور الحقيقية</label>
-            <div class="upload-row">
-              <input type="file" id="photoInput" accept="image/*">
-              <span class="hint">تُرفع إلى Google Drive وتُحفظ روابطها تلقائياً.</span>
-            </div>
-            <div class="thumbs" id="photoThumbs"></div></div>
-          <div class="field full"><label>ملاحظات</label><textarea name="Notes"></textarea></div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" id="saveBtn">حفظ</button>
-          <button type="button" class="btn btn-secondary" data-close="formModal">إلغاء</button>
-        </div>
-      </form>
+    <div class="body">
+      <p>تُفتح المنصة عبر خدمة الجامعة الآمنة (الدخول بحساب <span dir="ltr">@sr.edu.sa</span>).</p>
+      <a class="btn" id="open" href="#">افتح المنصة</a>
+      <div class="ver">Rooms Digital Twin · v2.0</div>
     </div>
   </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- config.js must define window.RDT_CONFIG (copy from config.sample.js) -->
-<script src="config.js?v=1.9"></script>
-<script src="assets/app.js?v=1.9"></script>
+<script src="config.js?v=2.0"></script>
+<script>
+  var url=(window.RDT_CONFIG&&window.RDT_CONFIG.APP_URL)||"";
+  var a=document.getElementById("open");
+  if(url){ a.href=url; setTimeout(function(){ location.href=url; }, 900); }
+  else { a.textContent="لم يُضبط رابط المنصة بعد"; }
+</script>
 </body>
 </html>
