@@ -3,6 +3,25 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.3] — 2026-11-19
+**العربية — تعيين الأدوار تلقائياً من رقم القاعة**
+- قاعدة الدور حسب أول رقم في رقم القاعة: **1 = الأرضي · 2 = الأول · 3 = الثاني · 4 = الثالث** (مثال: `(3254)` ← الثاني).
+- تحديث لمرة واحدة يُطبَّق تلقائياً عند أول دخول للمشرف بعد النشر: يُعيَّن الدور لـ **118 قاعة من 124** (18 أرضي · 45 أول · 48 ثاني · 7 ثالث)، ويُكتب عمود الدور في عملية واحدة، ويُسجَّل في تبويب `_Meta` وفي `AccessLog`، ولا يُعاد تشغيله.
+- طُبّقت القاعدة على جميع القاعات المرقّمة كما طُلب، بما فيها `SPSS Lab (1110)` (كانت «الأول» ← «الأرضي»).
+- 6 قاعات بلا رقم في اسمها تبقى «غير محدد»: Library Meeting Room، Conference Hall، Auditorium (Female)، Auditorium (Male)، Multi-Purpose Hall 1 و 2.
+- القاعات الجديدة: يُقترح الدور تلقائياً أثناء كتابة اسم القاعة في النموذج، ويُشتق عند الحفظ إن لم يُختر دور.
+- دالة يدوية `applyFloorRuleNow()` لإعادة تطبيق القاعدة من محرر Apps Script عند الحاجة.
+- اختُبر الكود الخادمي على نسخة من بيانات الـ Sheet الحية قبل النشر.
+
+**English — automatic floors from the room number**
+- Floor rule by the first digit of the room number: **1 = Ground · 2 = First · 3 = Second · 4 = Third** (e.g. `(3254)` → Second).
+- One-time update that runs automatically on the admin's first visit after deploy: sets the floor for **118 of 124 rooms** (18/45/48/7), written as a single column update, recorded in a `_Meta` tab and in `AccessLog`, never re-run.
+- Applied to every numbered room as requested, including `SPSS Lab (1110)` (First → Ground).
+- 6 rooms with no number in their name stay "Unassigned".
+- New rooms: the floor is suggested while typing the room name and derived on save when none is chosen.
+- Manual `applyFloorRuleNow()` function to re-apply the rule from the Apps Script editor if needed.
+- Server code tested against a copy of the live Sheet data before release.
+
 ## [2.2] — 2026-11-19
 **العربية — مستكشف المباني: مبانٍ رئيسية + أدوار + تمييز قاعات الطالبات**
 - تجميع المباني الرئيسية بغضّ النظر عن الفئة (مثل `Part 4 - Female` + `Part 4 - Male` ← **Part 4**) بالترتيب: Part 1 · Part 2 · Part 3 · Part 4 · Part 5 · Conference Hall.

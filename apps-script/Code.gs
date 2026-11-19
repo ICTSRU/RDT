@@ -1,6 +1,6 @@
 /*  SRU Rooms Digital Twin — Apps Script (same-origin HtmlService app)
     منصة التوأم الرقمي للقاعات — خادم وواجهة بنفس الأصل
-    Version: 2.2
+    Version: 2.3
     Hosting : the app is SERVED by this Apps Script (doGet -> HtmlService),
               so the browser <-> server calls use google.script.run (NO CORS,
               NO anonymous access needed).
@@ -14,7 +14,7 @@ var ALLOWED_DOMAIN  = 'sr.edu.sa';
 var SHEET_ID        = '1wxe--_wSBtwwZsjUMYLNqAs0JhqUJIgzgNdpRMSZKbs';
 var PHOTO_FOLDER_ID = '17_syqcbSD47oQYiluI5sUUT4wiCRQD9q';
 var ADMIN_EMAILS    = ['m.elmahdy@sr.edu.sa'];
-var APP_VERSION     = '2.2';
+var APP_VERSION     = '2.3';
 // Logos are loaded from GitHub (image loads are not CORS-restricted):
 var LOGO_BASE       = 'https://ictsru.github.io/RDT/assets/logos/';
 // ==============================================================
@@ -45,12 +45,67 @@ function isAdmin_(email){
   return ADMIN_EMAILS.map(function(a){return a.toLowerCase();}).indexOf(email) !== -1;
 }
 
+// ---- floor rule: first digit of the room number -> floor ----
+// 1 = الأرضي · 2 = الأول · 3 = الثاني · 4 = الثالث   (e.g. "(3254)" -> الثاني)
+var FLOOR_BY_DIGIT = {'1':'الأرضي','2':'الأول','3':'الثاني','4':'الثالث'};
+function roomNumber_(name){
+  var s = String(name||'');
+  var m = /\(\s*(\d{3,5})\s*\)/.exec(s) || /(?:^|\D)(\d{4})(?:\D|$)/.exec(s);
+  return m ? m[1] : '';
+}
+function floorFromName_(name){ var n = roomNumber_(name); return n ? (FLOOR_BY_DIGIT[n.charAt(0)] || '') : ''; }
+
+// Writes the Floor column in one call. overwrite=true applies the rule to every
+// numbered room; rooms without a number in their name are left untouched.
+function applyFloorRule_(overwrite){
+  var sh = sheet_('Rooms', ROOM_COLS); ensureCols_(sh);
+  var values = sh.getDataRange().getValues(); var head = values[0];
+  var iN = head.indexOf('RoomName'), iF = head.indexOf('Floor'), iId = head.indexOf('RoomID');
+  var col = [], changed = [];
+  for(var r=1; r<values.length; r++){
+    var cur = String(values[r][iF]==null ? '' : values[r][iF]).trim();
+    var f = floorFromName_(values[r][iN]);
+    var next = (f && (overwrite || !cur)) ? f : cur;
+    if(next !== cur) changed.push({ id:String(values[r][iId]), name:String(values[r][iN]), from:cur, to:next });
+    col.push([next]);
+  }
+  if(changed.length && col.length) sh.getRange(2, iF+1, col.length, 1).setValues(col);
+  return { changed: changed.length, details: changed };
+}
+// Manual re-run from the Apps Script editor if ever needed.
+function applyFloorRuleNow(){ var res = applyFloorRule_(true); Logger.log(JSON.stringify(res)); return res; }
+
+// One-time migrations, recorded in a _Meta tab (no extra OAuth scope needed).
+function metaGet_(key){
+  var v = sheet_('_Meta',['Key','Value','At']).getDataRange().getValues();
+  for(var i=1;i<v.length;i++){ if(v[i][0]===key) return v[i][1]; }
+  return null;
+}
+function metaSet_(key, val){
+  var sh = sheet_('_Meta',['Key','Value','At']); var v = sh.getDataRange().getValues();
+  for(var i=1;i<v.length;i++){ if(v[i][0]===key){ sh.getRange(i+1,2,1,2).setValues([[val, nowStr_()]]); return; } }
+  sh.appendRow([key, val, nowStr_()]);
+}
+function runMigrations_(email){
+  if(metaGet_('floor_rule_v1')) return null;            // already applied once
+  var res = applyFloorRule_(true);
+  metaSet_('floor_rule_v1', 'applied to ' + res.changed + ' rooms');
+  logAccess_(email, 'Migration:FloorRule(' + res.changed + ')');
+  return res;
+}
+
 // ---- client-callable API (google.script.run) ---------------
 function getBootstrap(){
   var email = currentUser_();
   if(!email) return { ok:false, error:'unauthorized' };
   logAccess_(email, 'Login');
-  return { ok:true, email:email, isAdmin:isAdmin_(email), version:APP_VERSION, rooms:listRooms_() };
+  var migration = null;
+  if(isAdmin_(email)){
+    try { var m = runMigrations_(email); if(m) migration = { changed: m.changed }; }
+    catch(err){ migration = { error: String(err) }; }
+  }
+  return { ok:true, email:email, isAdmin:isAdmin_(email), version:APP_VERSION,
+           rooms:listRooms_(), migration:migration };
 }
 function saveRoomSvc(room){
   var email = currentUser_();
@@ -106,6 +161,8 @@ function saveRoom_(room, email){
     room.RoomID = 'R' + ('000'+(max+1)).slice(-3);
   }
   room.UpdatedBy = email; room.UpdatedAt = nowStr_();
+  // new/edited room with no floor chosen: derive it from the room number
+  if(!room.Floor){ var df = floorFromName_(room.RoomName); if(df) room.Floor = df; }
   var found = -1;
   for(var i=1;i<values.length;i++){ if(String(values[i][idIdx]) === String(room.RoomID)){ found = i+1; break; } }
   var base = found > 0 ? values[found-1].slice() : head.map(function(){ return ''; });
