@@ -3,6 +3,23 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.2] — 2026-11-19
+**العربية — مستكشف المباني: مبانٍ رئيسية + أدوار + تمييز قاعات الطالبات**
+- تجميع المباني الرئيسية بغضّ النظر عن الفئة (مثل `Part 4 - Female` + `Part 4 - Male` ← **Part 4**) بالترتيب: Part 1 · Part 2 · Part 3 · Part 4 · Part 5 · Conference Hall.
+- تبويبات أدوار ثابتة لمباني Part: **كل الأدوار · الأرضي · الأول · الثاني · الثالث** مع عدد القاعات لكل دور، وتبويب «غير محدد» للقاعات التي لم يُحدَّد دورها، وتنبيه عند عدم تعبئة الأدوار. Conference Hall بلا أدوار.
+- **تمييز قاعات الطالبات بلون وردي واضح** مع شارة «طالبات»، وقاعات الطلاب بخلفية بيضاء؛ التصنيف يظهر كشريط ملوّن علوي ووسم نصي. ملخص المبنى يعرض عدد قاعات الطالبات والطلاب.
+- شارة «طالبات» وردية أيضاً في لوحة التشغيل والمعرض البصري.
+- خانة «الدور» في النموذج أصبحت قائمة منسدلة (الأرضي/الأول/الثاني/الثالث) لضمان تطابقها مع التبويبات، مع الحفاظ على أي قيمة قديمة مكتوبة يدوياً.
+- تحسين داخلي: الوصول لحقول النموذج عبر `form.elements` القياسي.
+
+**English — Building Explorer: main buildings + floors + female-room highlight**
+- Main buildings grouped regardless of gender suffix (e.g. `Part 4 - Female` + `Part 4 - Male` → **Part 4**), ordered Part 1–5, then Conference Hall.
+- Fixed floor tabs for Part buildings: **All · Ground · First · Second · Third** with per-floor counts, plus "Unassigned" and a hint when floors are not filled yet. No floors for Conference Hall.
+- **Female rooms highlighted in a clear rose colour** with a "طالبات" badge; male rooms stay white; category shown as a top colour stripe + text label. Building summary shows female/male room counts.
+- Rose "طالبات" pill added to the Console and Gallery views.
+- The Floor field in the form is now a dropdown (Ground/First/Second/Third) to match the tabs; any legacy free-text value is preserved.
+- Internal: form fields accessed via standard `form.elements`.
+
 ## [2.1] — 2026-11-19
 **العربية — ثلاث طرق عرض قابلة للتبديل**
 - مبدّل عرض في شريط الأدوات بين: **لوحة التشغيل** (جدول تشغيلي شامل) · **مستكشف المباني** (مخطط المبنى، مساحة كل قاعة تتناسب مع سعتها الفعلية، حول ممر، مع تبويبات المباني وفلتر الدور) · **المعرض البصري** (بطاقات بالصور وأسماء الأجهزة).

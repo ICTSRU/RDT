@@ -1,5 +1,5 @@
 <script>
-/* SRU Rooms Digital Twin — client logic (v2.1, HtmlService + google.script.run · 3 switchable views) */
+/* SRU Rooms Digital Twin — client logic (v2.1, HtmlService + google.script.run · 3 switchable views · v2.2 explorer) */
 (function(){
 "use strict";
 var LOGO_BASE = "https://ictsru.github.io/RDT/assets/logos/";
@@ -86,6 +86,7 @@ function catCls(c){ return CATCLS[c]||"c-other"; }
 function num(v){ var n=parseInt(v,10); return isNaN(n)?0:n; }
 function fmt(n){ return Number(n).toLocaleString("en-US"); }
 function chip(c){ return '<span class="cchip '+catCls(c)+'">'+esc(c||"—")+'</span>'; }
+function gpill(g){ return g==="طالبات" ? '<span class="gpill fem">طالبات</span>' : esc(g||"—"); }
 function spill(s){ return '<span class="spill '+(s==="نشطة"?"on":"off")+'">'+esc(s||"—")+'</span>'; }
 
 function loadView(){ try{ return localStorage.getItem("rdt_view"); }catch(e){ return null; } }
@@ -150,7 +151,7 @@ function renderConsole(list){
       +'<td>'+chip(r.Category)+'</td>'
       +'<td class="ltr">'+esc(r.Building||"—")+'</td>'
       +'<td'+(r.Floor?'':' class="muted"')+'>'+esc(r.Floor||"—")+'</td>'
-      +'<td>'+esc(r.Gender||"—")+'</td>'
+      +'<td>'+gpill(r.Gender)+'</td>'
       +'<td><b>'+esc(r.Capacity||"—")+'</b></td>'
       +'<td'+(d?'':' class="muted"')+'>'+(d?d:"—")+'</td>'
       +'<td>'+spill(r.Status)+'</td></tr>';
@@ -162,44 +163,64 @@ function renderConsole(list){
   bindOpen("#viewHost .linkbtn");
 }
 
-// ---- B · مستكشف المباني ----
+// ---- B · مستكشف المباني (v2.2: main buildings + fixed floors + female highlight) ----
+var MAIN_BLDS=["Part 1","Part 2","Part 3","Part 4","Part 5","Conference Hall"];
+var FLOORS=["الأرضي","الأول","الثاني","الثالث"];
+function baseBld(b){ return String(b||"").replace(/\s+/g," ").replace(/\s*-\s*(Female|Male)\s*$/i,"").trim(); }
+function hasFloors(b){ return /^Part\s*\d/i.test(b); }
+function isFemale(r){ return r.Gender==="طالبات"; }
+
 function renderExplorer(list){
-  var counts={}; state.rooms.forEach(function(r){ if(r.Building) counts[r.Building]=(counts[r.Building]||0)+1; });
-  var blds=Object.keys(counts).sort();
+  var counts={}; state.rooms.forEach(function(r){ var b=baseBld(r.Building); if(b) counts[b]=(counts[b]||0)+1; });
+  var blds=MAIN_BLDS.filter(function(b){return counts[b];})
+    .concat(Object.keys(counts).filter(function(b){return MAIN_BLDS.indexOf(b)<0;}).sort());
   if(!blds.length){ $("#viewHost").innerHTML=emptyMsg(); return; }
-  if(!state.building || !counts[state.building]){
-    state.building=blds.slice().sort(function(a,b){return counts[b]-counts[a];})[0];
-  }
-  var tabs='<nav class="bldtabs" aria-label="المباني">'+blds.map(function(b){
+  if(!state.building || !counts[state.building]) state.building=blds[0];
+
+  var tabs='<nav class="bldtabs" aria-label="المباني الرئيسية">'+blds.map(function(b){
     return '<button type="button" class="btab" data-b="'+esc(b)+'" aria-pressed="'+(b===state.building?"true":"false")+'">'
       +'<span dir="ltr">'+esc(b)+'</span><span class="n">'+counts[b]+'</span></button>';
   }).join("")+'</nav>';
 
-  var inB=list.filter(function(r){return r.Building===state.building;});
-  var floors=Array.from(new Set(state.rooms.filter(function(r){return r.Building===state.building&&r.Floor;}).map(function(r){return r.Floor;}))).sort();
-  if(state.floor && floors.indexOf(state.floor)<0) state.floor="";
-  if(state.floor) inB=inB.filter(function(r){return r.Floor===state.floor;});
+  var inB=list.filter(function(r){return baseBld(r.Building)===state.building;});
+
+  // fixed floor tabs for Part 1–5 (counts before the floor filter is applied)
+  var floorNav="", floorHint="";
+  if(hasFloors(state.building)){
+    var fc={}; inB.forEach(function(r){ var k=FLOORS.indexOf(r.Floor)>=0?r.Floor:"__none"; fc[k]=(fc[k]||0)+1; });
+    var opts=[{k:"",t:"كل الأدوار",n:inB.length}].concat(FLOORS.map(function(f){return {k:f,t:"الدور "+f,n:fc[f]||0};}));
+    if(fc.__none) opts.push({k:"__none",t:"غير محدد",n:fc.__none});
+    if(state.floor && !opts.some(function(o){return o.k===state.floor;})) state.floor="";
+    floorNav='<nav class="floortabs" aria-label="الأدوار">'+opts.map(function(o){
+      return '<button type="button" class="ftab'+(o.n?'':' zero')+'" data-f="'+esc(o.k)+'" aria-pressed="'+(o.k===state.floor?"true":"false")+'">'
+        +esc(o.t)+'<span class="n">'+o.n+'</span></button>';
+    }).join("")+'</nav>';
+    if(inB.length && fc.__none===inB.length) floorHint='<p class="fhint">لم يُحدَّد دور أي قاعة في هذا المبنى بعد — افتح القاعة واختر «الدور» لتظهر في تبويب دورها.</p>';
+    if(state.floor==="__none") inB=inB.filter(function(r){return FLOORS.indexOf(r.Floor)<0;});
+    else if(state.floor) inB=inB.filter(function(r){return r.Floor===state.floor;});
+  } else { state.floor=""; }
+
   var capB=inB.reduce(function(s,r){return s+num(r.Capacity);},0);
+  var fem=inB.filter(isFemale).length;
+  var floorLbl = state.floor==="__none" ? " · غير محدد الدور" : (state.floor ? " · الدور "+state.floor : "");
+  var head='<div class="bhead"><div><h2><span dir="ltr">'+esc(state.building)+'</span>'+esc(floorLbl)+' · '+inB.length+' قاعة</h2>'
+    +'<p>مساحة كل قاعة تتناسب مع سعتها الفعلية · السعة '+fmt(capB)+' مقعد'
+    +(inB.length?' · <span class="femtxt">طالبات '+fem+'</span> · طلاب وغيرهم '+(inB.length-fem):'')+'</p></div></div>';
 
-  var floorSel='<label class="floorlbl">الدور<select id="fFloor"'+(floors.length?'':' disabled')+'>'
-    +'<option value="">كل الأدوار</option>'+floors.map(function(f){return '<option'+(f===state.floor?' selected':'')+'>'+esc(f)+'</option>';}).join("")
-    +'</select>'+(floors.length?'':'<span style="font-weight:400">يُفعَّل بعد تعبئة خانة «الدور»</span>')+'</label>';
-
-  var head='<div class="bhead"><div><h2><span dir="ltr">'+esc(state.building)+'</span> · '+inB.length+' قاعة</h2>'
-    +'<p>مساحة كل قاعة في المخطط تتناسب مع سعتها الفعلية · السعة الكلية '+fmt(capB)+' مقعد</p></div>'+floorSel+'</div>';
-
-  var legend='<div class="legend">'+CATEGORIES.map(function(c){return '<span class="cchip '+catCls(c)+'">'+esc(c)+'</span>';}).join("")
+  var legend='<div class="legend"><span class="lg-fem"><i></i>قاعات الطالبات</span><span class="lg-sep" aria-hidden="true"></span>'
+    +CATEGORIES.map(function(c){return '<span class="lg-cat '+catCls(c)+'"><i></i>'+esc(c)+'</span>';}).join("")
     +'<span class="inact"><i></i>غير نشطة</span></div>';
 
   function tile(r){
-    var cap=Math.max(num(r.Capacity),1), off=r.Status!=="نشطة";
-    return '<button type="button" class="tile '+catCls(r.Category)+(off?' inactive':'')+'" style="flex:'+cap+' 1 0px" data-id="'+esc(r.RoomID)+'"'
-      +' aria-label="'+esc(r.RoomName+" — "+(r.Category||"")+" — "+(r.Capacity||"؟")+" مقعد"+(off?" — غير نشطة":""))+'">'
+    var cap=Math.max(num(r.Capacity),1), off=r.Status!=="نشطة", f=isFemale(r);
+    return '<button type="button" class="tile '+catCls(r.Category)+(f?' fem':'')+(off?' inactive':'')+'" style="flex:'+cap+' 1 0px" data-id="'+esc(r.RoomID)+'"'
+      +' aria-label="'+esc(r.RoomName+" — "+(r.Category||"")+" — "+(r.Gender||"")+" — "+(r.Capacity||"؟")+" مقعد"+(off?" — غير نشطة":""))+'">'
       +'<span class="tn">'+esc(r.RoomName)+'</span>'
+      +'<span class="tmeta"><span class="tcat">'+esc(r.Category||"")+'</span>'+(f?'<span class="tg">طالبات</span>':'')+'</span>'
       +'<span class="tc">'+ICN.users+esc(r.Capacity||"—")+' مقعد'+(off?' · غير نشطة':'')+'</span></button>';
   }
   var plan;
-  if(!inB.length){ plan=emptyMsg(); }
+  if(!inB.length){ plan='<div class="empty">لا توجد قاعات في هذا الاختيار.</div>'; }
   else {
     var half=Math.ceil(inB.length/2);
     plan='<div class="plan" aria-label="مخطط المبنى"><div class="wing">'+inB.slice(0,half).map(tile).join("")+'</div>'
@@ -211,9 +232,9 @@ function renderExplorer(list){
     return '<div class="bstat"><div class="l">'+esc(c)+'</div><div class="v">'+byCat[c]+'</div></div>';
   }).join("")+'</div>';
 
-  $("#viewHost").innerHTML=tabs+head+legend+plan+stats;
+  $("#viewHost").innerHTML=tabs+floorNav+head+floorHint+legend+plan+stats;
   $$("#viewHost .btab").forEach(function(b){ b.onclick=function(){ state.building=b.dataset.b; state.floor=""; render(); }; });
-  var ff=$("#fFloor"); if(ff) ff.onchange=function(){ state.floor=ff.value; render(); };
+  $$("#viewHost .ftab").forEach(function(b){ b.onclick=function(){ state.floor=b.dataset.f; render(); }; });
   bindOpen("#viewHost .tile");
 }
 
@@ -231,7 +252,7 @@ function renderGallery(list){
         +'<span class="cap">'+ICN.users+esc(r.Capacity||"—")+'</span>'+spill(r.Status)+chip(r.Category)
       +'</div>'
       +'<div class="gb"><div><h3>'+esc(r.RoomName)+'</h3>'
-        +'<p class="sub"><span dir="ltr">'+esc(r.Building||"—")+'</span>'+(r.Floor?' · الدور '+esc(r.Floor):'')+' · '+esc(r.Gender||"—")+'</p></div>'
+        +'<p class="sub"><span dir="ltr">'+esc(r.Building||"—")+'</span>'+(r.Floor?' · الدور '+esc(r.Floor):'')+' · '+gpill(r.Gender)+'</p></div>'
         +'<div class="dchips" aria-label="الأجهزة">'+dc+'</div>'
         +'<button type="button" class="gopen" data-id="'+esc(r.RoomID)+'">عرض التوأم الرقمي'
         +'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>'
@@ -277,11 +298,12 @@ function cell(k,v){return '<div><div class="k">'+esc(k)+'</div><div class="v">'+
 // ---- add/edit ----
 function openForm(r){
   r=r||{}; state.photos=splitList(r.PhotoURLs);
-  var f=$("#roomForm");
+  var f=$("#roomForm").elements;
   f.RoomID.value=r.RoomID||""; f.RoomName.value=r.RoomName||"";
   f.Category.value=r.Category||CATEGORIES[0]; f.SourceType.value=r.SourceType||"";
   f.Gender.value=r.Gender||"طلاب"; f.Building.value=r.Building||"";
-  f.Floor.value=r.Floor||""; f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
+  var fl=f.Floor; if(r.Floor && ![].some.call(fl.options,function(o){return o.value===r.Floor;})){ var op=document.createElement("option"); op.value=r.Floor; op.textContent=r.Floor; fl.appendChild(op); }
+  fl.value=r.Floor||""; f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
   f.Specs.value=r.Specs||""; f.Notes.value=r.Notes||"";
   state.devices=parseDevices(r.Devices); renderDevices();
   $("#formTitle").textContent = r.RoomID? ("تعديل: "+r.RoomName) : "إضافة قاعة جديدة";
@@ -327,7 +349,7 @@ function handleUpload(input){
   var reader=new FileReader();
   reader.onload=function(){
     var b64=reader.result.split(",")[1]; toast("جارٍ رفع الصورة…");
-    run("uploadPhotoSvc",$("#roomForm").RoomID.value||"new",file.name,file.type,b64)
+    run("uploadPhotoSvc",$("#roomForm").elements.RoomID.value||"new",file.name,file.type,b64)
       .then(function(res){ if(res&&res.ok){state.photos.push(res.url);renderThumbs();toast("تم رفع الصورة");} else toast("تعذّر رفع الصورة"); })
       .catch(function(){ toast("تعذّر رفع الصورة"); });
     input.value="";
@@ -336,7 +358,7 @@ function handleUpload(input){
 }
 function saveRoom(e){
   e.preventDefault();
-  var f=$("#roomForm");
+  var f=$("#roomForm").elements;
   var devices=state.devices.map(function(d){ return {name:(d.name||"").trim(),model:(d.model||"").trim(),ip:(d.ip||"").trim(),
       specs:(d.specs||[]).map(function(p){return [(p[0]||"").trim(),(p[1]||"").trim()];}).filter(function(p){return p[0]||p[1];})}; })
     .filter(function(d){ return d.name||d.model||d.ip||d.specs.length; });

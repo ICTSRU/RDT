@@ -97,7 +97,7 @@
   <div class="wrap">
     <a class="itoc" id="itoc-link" href="https://ictsru.github.io/ITOC/#forms" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
     <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    <span class="vbadge">Rooms Digital Twin · v2.1</span>
+    <span class="vbadge">Rooms Digital Twin · v2.2</span>
   </div>
 </footer>
 
@@ -136,7 +136,14 @@
             </select></div>
           <div class="field"><label>النوع (المصدر)</label><input name="SourceType" placeholder="Lecture Hall / Lab …"></div>
           <div class="field"><label>المبنى</label><input name="Building"></div>
-          <div class="field"><label>الدور</label><input name="Floor" placeholder="مثال: الأرضي / الأول / الثاني"></div>
+          <div class="field"><label for="fFloorInput">الدور</label>
+            <select name="Floor" id="fFloorInput">
+              <option value="">— غير محدد —</option>
+              <option value="الأرضي">الأرضي</option>
+              <option value="الأول">الأول</option>
+              <option value="الثاني">الثاني</option>
+              <option value="الثالث">الثالث</option>
+            </select></div>
           <div class="field"><label>الفئة</label>
             <select name="Gender">
               <option>طلاب</option><option>طالبات</option>

@@ -1,6 +1,6 @@
 /*  SRU Rooms Digital Twin — Apps Script (same-origin HtmlService app)
     منصة التوأم الرقمي للقاعات — خادم وواجهة بنفس الأصل
-    Version: 2.1
+    Version: 2.2
     Hosting : the app is SERVED by this Apps Script (doGet -> HtmlService),
               so the browser <-> server calls use google.script.run (NO CORS,
               NO anonymous access needed).
@@ -14,7 +14,7 @@ var ALLOWED_DOMAIN  = 'sr.edu.sa';
 var SHEET_ID        = '1wxe--_wSBtwwZsjUMYLNqAs0JhqUJIgzgNdpRMSZKbs';
 var PHOTO_FOLDER_ID = '17_syqcbSD47oQYiluI5sUUT4wiCRQD9q';
 var ADMIN_EMAILS    = ['m.elmahdy@sr.edu.sa'];
-var APP_VERSION     = '2.1';
+var APP_VERSION     = '2.2';
 // Logos are loaded from GitHub (image loads are not CORS-restricted):
 var LOGO_BASE       = 'https://ictsru.github.io/RDT/assets/logos/';
 // ==============================================================
