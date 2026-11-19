@@ -3,6 +3,23 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.1] — 2026-11-19
+**العربية — ثلاث طرق عرض قابلة للتبديل**
+- مبدّل عرض في شريط الأدوات بين: **لوحة التشغيل** (جدول تشغيلي شامل) · **مستكشف المباني** (مخطط المبنى، مساحة كل قاعة تتناسب مع سعتها الفعلية، حول ممر، مع تبويبات المباني وفلتر الدور) · **المعرض البصري** (بطاقات بالصور وأسماء الأجهزة).
+- شريط مؤشرات حيّ أعلى الصفحة: إجمالي القاعات، النشطة، غير النشطة، السعة الإجمالية، القاعات بأجهزة مسجّلة، القاعات بصور — محسوبة من البيانات الفعلية.
+- خيار «ترتيب حسب» (الأكبر سعة / الاسم / المبنى) مشترك بين الطرق الثلاث، والفلاتر والبحث والتصنيفات تعمل على الثلاث.
+- حفظ آخر طريقة عرض اختارها المستخدم تلقائياً.
+- القاعات غير النشطة تظهر بحدود متقطّعة في المخطط؛ فلتر الدور يُفعَّل تلقائياً عند تعبئة خانة «الدور».
+- اختُبرت الطرق الثلاث ببيانات القاعات الـ 124 الفعلية دون أخطاء.
+
+**English — three switchable views**
+- Toolbar view switcher: **Operations Console** (register table) · **Building Explorer** (schematic floor plan, tiles sized by real capacity around a corridor, building tabs + floor filter) · **Visual Gallery** (photo cards with device names).
+- Live KPI strip computed from real data (total, active, inactive, total capacity, rooms with devices, rooms with photos).
+- Shared "sort by" (capacity / name / building); search, filters and category tabs apply to all three views.
+- The last chosen view is remembered per user.
+- Inactive rooms render dashed on the plan; the floor filter enables itself once Floor data exists.
+- All three views tested against the 124 real rooms with no errors.
+
 ## [2.0] — 2026-11-18
 **العربية — تغيير معماري جذري (حل نهائي لمشكلة الاتصال)**
 - أصبحت المنصة تُقدَّم من Apps Script نفسه عبر `HtmlService` (ملفات `Index.html` / `Style.html` / `Script.html`)، واستُبدل `fetch` بجسر `google.script.run` — فالاتصال الآن **بنفس الأصل تماماً: لا CORS ولا حاجة لوصول مجهول**.

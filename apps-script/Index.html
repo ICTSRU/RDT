@@ -46,8 +46,32 @@
 </header>
 
 <main class="container">
+  <section class="kpis" id="kpis" aria-label="مؤشرات القاعات"></section>
+
+  <div class="viewbar">
+    <div class="viewswitch" role="group" aria-label="طريقة العرض">
+      <button type="button" class="vbtn" data-view="console" aria-pressed="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
+        لوحة التشغيل</button>
+      <button type="button" class="vbtn" data-view="explorer" aria-pressed="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="13" y="10" width="8" height="11" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/></svg>
+        مستكشف المباني</button>
+      <button type="button" class="vbtn" data-view="gallery" aria-pressed="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        المعرض البصري</button>
+    </div>
+    <label class="sortlbl">ترتيب حسب
+      <select id="fSort">
+        <option value="cap">الأكبر سعة</option>
+        <option value="name">الاسم</option>
+        <option value="building">المبنى</option>
+      </select>
+    </label>
+  </div>
+
   <div class="tabs" id="tabs"></div>
   <div class="filters">
+    <label class="vh" for="q">بحث</label>
     <input class="search" id="q" type="search" placeholder="بحث: اسم القاعة، مبنى، جهاز…">
     <select id="fBuilding"><option value="">كل المباني</option></select>
     <select id="fGender">
@@ -66,14 +90,14 @@
     <span id="count" class="hint"></span>
     <button class="btn btn-primary hidden" id="addRoomBtn">＋ إضافة قاعة</button>
   </div>
-  <div class="grid" id="grid"></div>
+  <div id="viewHost"></div>
 </main>
 
 <footer class="appfooter sru-tech-bg-dark">
   <div class="wrap">
     <a class="itoc" id="itoc-link" href="https://ictsru.github.io/ITOC/#forms" target="_blank" rel="noopener"><img id="logo-itoc" src="" alt="ITOC"></a>
     <div class="mid">جميع الحقوق محفوظة — جامعة سليمان الراجحي · الإدارة التنفيذية للاتصالات وتقنية المعلومات</div>
-    <span class="vbadge">Rooms Digital Twin · v2.0</span>
+    <span class="vbadge">Rooms Digital Twin · v2.1</span>
   </div>
 </footer>
 

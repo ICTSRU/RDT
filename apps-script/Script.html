@@ -1,11 +1,11 @@
 <script>
-/* SRU Rooms Digital Twin — client logic (v2.0, HtmlService + google.script.run) */
+/* SRU Rooms Digital Twin — client logic (v2.1, HtmlService + google.script.run · 3 switchable views) */
 (function(){
 "use strict";
 var LOGO_BASE = "https://ictsru.github.io/RDT/assets/logos/";
 var ITOC_HUB  = "https://ictsru.github.io/ITOC/#forms";
 var CATEGORIES = ["قاعات المحاضرات","قاعات الاختبار","القاعات الدراسية","الفصول الدراسية","قاعات الاجتماعات","أخرى"];
-var state = { rooms:[], cat:"الكل", isAdmin:false, email:"", photos:[], devices:[] };
+var state = { rooms:[], cat:"الكل", isAdmin:false, email:"", photos:[], devices:[], view:"console", building:"", floor:"" };
 
 var $ = function(s,r){return (r||document).querySelector(s);};
 var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
@@ -51,7 +51,7 @@ function enterApp(){
   $("#gate").classList.add("hidden");
   $("#who-email").textContent = state.email;
   $("#addRoomBtn").classList.toggle("hidden", !state.isAdmin);
-  renderTabs(); render();
+  renderKPIs(); renderSwitch(); renderTabs(); render();
 }
 
 // ===== render =======================================================
@@ -66,7 +66,7 @@ function renderTabs(){
 }
 function currentList(){
   var q=($("#q").value||"").trim().toLowerCase();
-  var fb=$("#fBuilding").value, fg=$("#fGender").value, fs=$("#fStatus").value;
+  var fb=(state.view==="explorer")?"":$("#fBuilding").value, fg=$("#fGender").value, fs=$("#fStatus").value;
   return state.rooms.filter(function(r){
     if(state.cat!=="الكل" && r.Category!==state.cat) return false;
     if(fb && r.Building!==fb) return false;
@@ -79,31 +79,165 @@ function currentList(){
 }
 function firstPhoto(r){var p=splitList(r.PhotoURLs);return p.length?p[0]:"";}
 
+// ===== v2.1 — three switchable views ================================
+var CATCLS = {"قاعات المحاضرات":"c-lec","قاعات الاختبار":"c-exam","القاعات الدراسية":"c-study",
+              "الفصول الدراسية":"c-class","قاعات الاجتماعات":"c-meet","أخرى":"c-other"};
+function catCls(c){ return CATCLS[c]||"c-other"; }
+function num(v){ var n=parseInt(v,10); return isNaN(n)?0:n; }
+function fmt(n){ return Number(n).toLocaleString("en-US"); }
+function chip(c){ return '<span class="cchip '+catCls(c)+'">'+esc(c||"—")+'</span>'; }
+function spill(s){ return '<span class="spill '+(s==="نشطة"?"on":"off")+'">'+esc(s||"—")+'</span>'; }
+
+function loadView(){ try{ return localStorage.getItem("rdt_view"); }catch(e){ return null; } }
+function saveView(v){ try{ localStorage.setItem("rdt_view", v); }catch(e){} }
+
+function sorted(list){
+  var s=$("#fSort").value, a=list.slice();
+  if(s==="name") a.sort(function(x,y){return String(x.RoomName).localeCompare(String(y.RoomName),"ar");});
+  else if(s==="building") a.sort(function(x,y){return String(x.Building).localeCompare(String(y.Building))||num(y.Capacity)-num(x.Capacity);});
+  else a.sort(function(x,y){return num(y.Capacity)-num(x.Capacity);});
+  return a;
+}
+
+function renderKPIs(){
+  var R=state.rooms, act=R.filter(function(r){return r.Status==="نشطة";}).length;
+  var blds={}; R.forEach(function(r){ if(r.Building) blds[r.Building]=1; });
+  var cap=R.reduce(function(s,r){return s+num(r.Capacity);},0);
+  var withDev=R.filter(function(r){return parseDevices(r.Devices).length>0;}).length;
+  var withPh=R.filter(function(r){return splitList(r.PhotoURLs).length>0;}).length;
+  var k=[
+    {l:"إجمالي القاعات",v:fmt(R.length),n:"في "+Object.keys(blds).length+" مبانٍ"},
+    {l:"قاعات نشطة",v:fmt(act),n:R.length?((act/R.length*100).toFixed(1)+"% من الإجمالي"):"—"},
+    {l:"غير نشطة",v:fmt(R.length-act),n:"تحتاج مراجعة",w:(R.length-act)>0},
+    {l:"السعة الإجمالية",v:fmt(cap),n:"مقعد"},
+    {l:"قاعات بأجهزة مسجّلة",v:fmt(withDev),n:"من "+fmt(R.length)},
+    {l:"قاعات بصور",v:fmt(withPh),n:"من "+fmt(R.length)}
+  ];
+  $("#kpis").innerHTML=k.map(function(x){
+    return '<div class="kpi'+(x.w?' warn':'')+'"><span class="l">'+esc(x.l)+'</span><span class="v">'+esc(x.v)+'</span><span class="n">'+esc(x.n)+'</span></div>';
+  }).join("");
+}
+
+function renderSwitch(){
+  $$(".vbtn").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.view===state.view?"true":"false"); });
+}
+function setView(v){ state.view=v; saveView(v); renderSwitch(); render(); }
+
 function render(){
   if(!$("#fBuilding").dataset.ready){
     var bs=Array.from(new Set(state.rooms.map(function(r){return r.Building;}))).filter(Boolean).sort();
     $("#fBuilding").innerHTML='<option value="">كل المباني</option>'+bs.map(function(b){return '<option>'+esc(b)+'</option>';}).join("");
     $("#fBuilding").dataset.ready="1";
   }
-  var list=currentList();
+  var list=sorted(currentList());
   $("#count").textContent=list.length+" قاعة";
-  if(!list.length){ $("#grid").innerHTML='<div class="empty">لا توجد قاعات مطابقة.</div>'; return; }
-  $("#grid").innerHTML=list.map(function(r){
-    var photo=firstPhoto(r), dev=parseDevices(r.Devices).length, on=r.Status==="نشطة";
-    return '<div class="card" data-id="'+esc(r.RoomID)+'">'
-      +'<div class="thumb"'+(photo?' style="background-image:url(\''+esc(photo)+'\')"':'')+'>'
-        +(photo?'':ICN.monitor)+'<span class="badge">'+esc(r.Category)+'</span>'
-        +(dev?'<span class="tech-count">'+ICN.cpu+dev+'</span>':'')
-      +'</div>'
-      +'<div class="body"><p class="title">'+esc(r.RoomName)+'</p>'
-      +'<div class="meta">'
-        +'<span>'+ICN.pin+esc(r.Building)+(r.Floor?' · الدور '+esc(r.Floor):'')+'</span>'
-        +'<span>'+ICN.users+esc(r.Capacity||"-")+'</span>'
-        +'<span>'+esc(r.Gender)+'</span>'
-        +'<span class="pill '+(on?'on':'off')+'">'+esc(r.Status)+'</span>'
-      +'</div></div></div>';
+  // the building filter is driven by the building tabs in the explorer view
+  $("#fBuilding").disabled = state.view==="explorer";
+  if(state.view==="explorer") renderExplorer(list);
+  else if(state.view==="gallery") renderGallery(list);
+  else renderConsole(list);
+}
+function bindOpen(sel){ $$(sel).forEach(function(b){ b.onclick=function(){ openDetail(b.dataset.id); }; }); }
+function emptyMsg(){ return '<div class="empty">لا توجد قاعات مطابقة للبحث أو الفلاتر.</div>'; }
+
+// ---- A · لوحة التشغيل ----
+function renderConsole(list){
+  if(!list.length){ $("#viewHost").innerHTML=emptyMsg(); return; }
+  var rows=list.map(function(r){
+    var d=parseDevices(r.Devices).length;
+    return '<tr>'
+      +'<td><button type="button" class="linkbtn" data-id="'+esc(r.RoomID)+'">'+esc(r.RoomName)+'</button></td>'
+      +'<td>'+chip(r.Category)+'</td>'
+      +'<td class="ltr">'+esc(r.Building||"—")+'</td>'
+      +'<td'+(r.Floor?'':' class="muted"')+'>'+esc(r.Floor||"—")+'</td>'
+      +'<td>'+esc(r.Gender||"—")+'</td>'
+      +'<td><b>'+esc(r.Capacity||"—")+'</b></td>'
+      +'<td'+(d?'':' class="muted"')+'>'+(d?d:"—")+'</td>'
+      +'<td>'+spill(r.Status)+'</td></tr>';
   }).join("");
-  $$("#grid .card").forEach(function(c){c.onclick=function(){openDetail(c.dataset.id);};});
+  $("#viewHost").innerHTML='<div class="tcard"><div class="twrap"><table class="rtable"><thead><tr>'
+    +'<th scope="col">القاعة</th><th scope="col">التصنيف</th><th scope="col">المبنى</th><th scope="col">الدور</th>'
+    +'<th scope="col">الفئة</th><th scope="col">السعة</th><th scope="col">الأجهزة</th><th scope="col">الحالة</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  bindOpen("#viewHost .linkbtn");
+}
+
+// ---- B · مستكشف المباني ----
+function renderExplorer(list){
+  var counts={}; state.rooms.forEach(function(r){ if(r.Building) counts[r.Building]=(counts[r.Building]||0)+1; });
+  var blds=Object.keys(counts).sort();
+  if(!blds.length){ $("#viewHost").innerHTML=emptyMsg(); return; }
+  if(!state.building || !counts[state.building]){
+    state.building=blds.slice().sort(function(a,b){return counts[b]-counts[a];})[0];
+  }
+  var tabs='<nav class="bldtabs" aria-label="المباني">'+blds.map(function(b){
+    return '<button type="button" class="btab" data-b="'+esc(b)+'" aria-pressed="'+(b===state.building?"true":"false")+'">'
+      +'<span dir="ltr">'+esc(b)+'</span><span class="n">'+counts[b]+'</span></button>';
+  }).join("")+'</nav>';
+
+  var inB=list.filter(function(r){return r.Building===state.building;});
+  var floors=Array.from(new Set(state.rooms.filter(function(r){return r.Building===state.building&&r.Floor;}).map(function(r){return r.Floor;}))).sort();
+  if(state.floor && floors.indexOf(state.floor)<0) state.floor="";
+  if(state.floor) inB=inB.filter(function(r){return r.Floor===state.floor;});
+  var capB=inB.reduce(function(s,r){return s+num(r.Capacity);},0);
+
+  var floorSel='<label class="floorlbl">الدور<select id="fFloor"'+(floors.length?'':' disabled')+'>'
+    +'<option value="">كل الأدوار</option>'+floors.map(function(f){return '<option'+(f===state.floor?' selected':'')+'>'+esc(f)+'</option>';}).join("")
+    +'</select>'+(floors.length?'':'<span style="font-weight:400">يُفعَّل بعد تعبئة خانة «الدور»</span>')+'</label>';
+
+  var head='<div class="bhead"><div><h2><span dir="ltr">'+esc(state.building)+'</span> · '+inB.length+' قاعة</h2>'
+    +'<p>مساحة كل قاعة في المخطط تتناسب مع سعتها الفعلية · السعة الكلية '+fmt(capB)+' مقعد</p></div>'+floorSel+'</div>';
+
+  var legend='<div class="legend">'+CATEGORIES.map(function(c){return '<span class="cchip '+catCls(c)+'">'+esc(c)+'</span>';}).join("")
+    +'<span class="inact"><i></i>غير نشطة</span></div>';
+
+  function tile(r){
+    var cap=Math.max(num(r.Capacity),1), off=r.Status!=="نشطة";
+    return '<button type="button" class="tile '+catCls(r.Category)+(off?' inactive':'')+'" style="flex:'+cap+' 1 0px" data-id="'+esc(r.RoomID)+'"'
+      +' aria-label="'+esc(r.RoomName+" — "+(r.Category||"")+" — "+(r.Capacity||"؟")+" مقعد"+(off?" — غير نشطة":""))+'">'
+      +'<span class="tn">'+esc(r.RoomName)+'</span>'
+      +'<span class="tc">'+ICN.users+esc(r.Capacity||"—")+' مقعد'+(off?' · غير نشطة':'')+'</span></button>';
+  }
+  var plan;
+  if(!inB.length){ plan=emptyMsg(); }
+  else {
+    var half=Math.ceil(inB.length/2);
+    plan='<div class="plan" aria-label="مخطط المبنى"><div class="wing">'+inB.slice(0,half).map(tile).join("")+'</div>'
+      +'<div class="corridor" aria-hidden="true">← الممر الرئيسي →</div>'
+      +'<div class="wing">'+inB.slice(half).map(tile).join("")+'</div></div>';
+  }
+  var byCat={}; inB.forEach(function(r){ byCat[r.Category]=(byCat[r.Category]||0)+1; });
+  var stats='<div class="bstats">'+Object.keys(byCat).map(function(c){
+    return '<div class="bstat"><div class="l">'+esc(c)+'</div><div class="v">'+byCat[c]+'</div></div>';
+  }).join("")+'</div>';
+
+  $("#viewHost").innerHTML=tabs+head+legend+plan+stats;
+  $$("#viewHost .btab").forEach(function(b){ b.onclick=function(){ state.building=b.dataset.b; state.floor=""; render(); }; });
+  var ff=$("#fFloor"); if(ff) ff.onchange=function(){ state.floor=ff.value; render(); };
+  bindOpen("#viewHost .tile");
+}
+
+// ---- C · المعرض البصري ----
+function renderGallery(list){
+  if(!list.length){ $("#viewHost").innerHTML=emptyMsg(); return; }
+  $("#viewHost").innerHTML='<div class="ggrid">'+list.map(function(r){
+    var ph=firstPhoto(r), devs=parseDevices(r.Devices);
+    var dc=devs.length? devs.slice(0,3).map(function(d){return '<span class="dchip">'+esc(d.name||"جهاز")+'</span>';}).join("")
+      +(devs.length>3?'<span class="dchip">+'+(devs.length-3)+'</span>':'')
+      : '<span class="dchip none">لا أجهزة مسجّلة بعد</span>';
+    return '<article class="gcard">'
+      +'<div class="ph"'+(ph?' style="background-image:url(\''+esc(ph)+'\')"':'')+'>'
+        +(ph?'':'<svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>')
+        +'<span class="cap">'+ICN.users+esc(r.Capacity||"—")+'</span>'+spill(r.Status)+chip(r.Category)
+      +'</div>'
+      +'<div class="gb"><div><h3>'+esc(r.RoomName)+'</h3>'
+        +'<p class="sub"><span dir="ltr">'+esc(r.Building||"—")+'</span>'+(r.Floor?' · الدور '+esc(r.Floor):'')+' · '+esc(r.Gender||"—")+'</p></div>'
+        +'<div class="dchips" aria-label="الأجهزة">'+dc+'</div>'
+        +'<button type="button" class="gopen" data-id="'+esc(r.RoomID)+'">عرض التوأم الرقمي'
+        +'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>'
+      +'</div></article>';
+  }).join("")+'</div>';
+  bindOpen("#viewHost .gopen");
 }
 
 function openDetail(id){
@@ -219,7 +353,7 @@ function saveRoom(e){
     if(res&&res.ok){
       var i=-1; state.rooms.forEach(function(x,k){if(x.RoomID===res.room.RoomID)i=k;});
       if(i>=0) state.rooms[i]=res.room; else state.rooms.push(res.room);
-      closeModal("formModal"); renderTabs(); render(); toast("تم الحفظ ✓");
+      closeModal("formModal"); renderKPIs(); renderTabs(); render(); toast("تم الحفظ ✓");
     } else toast(res&&res.error==="forbidden"?"ليست لديك صلاحية التعديل":"تعذّر الحفظ");
   }).catch(function(){ $("#saveBtn").disabled=false; toast("تعذّر الاتصال بالخادم"); });
 }
@@ -245,6 +379,9 @@ function boot(){
   $("#appMark").innerHTML=ICN.twin;
   ["q","fBuilding","fGender","fStatus"].forEach(function(id){
     var el=$("#"+id); el.addEventListener(id==="q"?"input":"change",render);});
+  var sv=loadView(); if(sv==="console"||sv==="explorer"||sv==="gallery") state.view=sv;
+  $$(".vbtn").forEach(function(b){ b.onclick=function(){ setView(b.dataset.view); }; });
+  $("#fSort").addEventListener("change",render);
   $("#addRoomBtn").onclick=function(){openForm(null);};
   $("#addDeviceBtn").onclick=addDevice;
   $("#roomForm").addEventListener("submit",saveRoom);
