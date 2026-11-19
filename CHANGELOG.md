@@ -3,6 +3,17 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.5] — 2026-11-19
+**العربية**
+- تغيير اسم المنصة إلى **«منصة القاعات الرقمية»** (Digital Rooms Platform) في عنوان الصفحة والترويسة وشاشة الدخول والتذييل وصفحة GitHub وREADME.
+- زر بطاقات المعرض أصبح «عرض تفاصيل القاعة».
+- قيمة `Platform` في `AccessLog` بقيت `Rooms Digital Twin` للحفاظ على تجميع السجلات في ITOC Access Monitor.
+
+**English**
+- Platform renamed to **"منصة القاعات الرقمية" (Digital Rooms Platform)** across title, header, sign-in screen, footer, GitHub page and README.
+- Gallery card button now reads "عرض تفاصيل القاعة".
+- The `Platform` value written to `AccessLog` stays `Rooms Digital Twin` so ITOC Access Monitor history stays grouped.
+
 ## [2.4] — 2026-11-19
 **العربية — قائمة المباني الرئيسية**
 - قائمة «المباني» في شريط الفلاتر أصبحت المباني الرئيسية فقط بالترتيب: **Part 1 · Part 2 · Part 3 · Part 4 · Part 5 · Conference Hall** بدل الأسماء الخام (مثل `Part 4 - Female` / `Part 4 - Male`). اختيار «Part 4» يعرض قاعاته الـ 30 كلها (طالبات وطلاب).
