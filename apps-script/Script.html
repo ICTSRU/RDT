@@ -1,5 +1,5 @@
 <script>
-/* SRU Rooms Digital Twin — client logic (v2.1, HtmlService + google.script.run · 3 switchable views · v2.3 floor rule) */
+/* SRU Rooms Digital Twin — client logic (v2.1, HtmlService + google.script.run · 3 switchable views · v2.4 main-building list) */
 (function(){
 "use strict";
 var LOGO_BASE = "https://ictsru.github.io/RDT/assets/logos/";
@@ -68,10 +68,10 @@ function renderTabs(){
 }
 function currentList(){
   var q=($("#q").value||"").trim().toLowerCase();
-  var fb=(state.view==="explorer")?"":$("#fBuilding").value, fg=$("#fGender").value, fs=$("#fStatus").value;
+  var fb=(state.view==="explorer")?"":$("#fBuilding").value, fg=$("#fGender").value, fs=$("#fStatus").value;  // explorer: building comes from its tabs
   return state.rooms.filter(function(r){
     if(state.cat!=="الكل" && r.Category!==state.cat) return false;
-    if(fb && r.Building!==fb) return false;
+    if(fb && baseBld(r.Building)!==fb) return false;
     if(fg && r.Gender!==fg) return false;
     if(fs && r.Status!==fs) return false;
     if(q){ var hay=(r.RoomName+" "+r.Building+" "+r.Devices+" "+r.SourceType+" "+r.RoomID+" "+r.Floor).toLowerCase();
@@ -128,14 +128,13 @@ function setView(v){ state.view=v; saveView(v); renderSwitch(); render(); }
 
 function render(){
   if(!$("#fBuilding").dataset.ready){
-    var bs=Array.from(new Set(state.rooms.map(function(r){return r.Building;}))).filter(Boolean).sort();
-    $("#fBuilding").innerHTML='<option value="">كل المباني</option>'+bs.map(function(b){return '<option>'+esc(b)+'</option>';}).join("");
+    $("#fBuilding").innerHTML='<option value="">كل المباني</option>'+mainBuildings().map(function(b){return '<option value="'+esc(b)+'">'+esc(b)+'</option>';}).join("");
     $("#fBuilding").dataset.ready="1";
   }
+  // explorer <-> dropdown sync: a building chosen in the dropdown opens that building's tab
+  if(state.view==="explorer" && $("#fBuilding").value) state.building=$("#fBuilding").value;
   var list=sorted(currentList());
   $("#count").textContent=list.length+" قاعة";
-  // the building filter is driven by the building tabs in the explorer view
-  $("#fBuilding").disabled = state.view==="explorer";
   if(state.view==="explorer") renderExplorer(list);
   else if(state.view==="gallery") renderGallery(list);
   else renderConsole(list);
@@ -169,6 +168,10 @@ function renderConsole(list){
 var MAIN_BLDS=["Part 1","Part 2","Part 3","Part 4","Part 5","Conference Hall"];
 var FLOORS=["الأرضي","الأول","الثاني","الثالث"];
 function baseBld(b){ return String(b||"").replace(/\s+/g," ").replace(/\s*-\s*(Female|Male)\s*$/i,"").trim(); }
+function mainBuildings(){
+  var seen={}; state.rooms.forEach(function(r){ var b=baseBld(r.Building); if(b) seen[b]=1; });
+  return MAIN_BLDS.filter(function(b){return seen[b];}).concat(Object.keys(seen).filter(function(b){return MAIN_BLDS.indexOf(b)<0;}).sort());
+}
 function hasFloors(b){ return /^Part\s*\d/i.test(b); }
 function isFemale(r){ return r.Gender==="طالبات"; }
 
@@ -235,7 +238,7 @@ function renderExplorer(list){
   }).join("")+'</div>';
 
   $("#viewHost").innerHTML=tabs+floorNav+head+floorHint+legend+plan+stats;
-  $$("#viewHost .btab").forEach(function(b){ b.onclick=function(){ state.building=b.dataset.b; state.floor=""; render(); }; });
+  $$("#viewHost .btab").forEach(function(b){ b.onclick=function(){ state.building=b.dataset.b; state.floor=""; $("#fBuilding").value=b.dataset.b; render(); }; });
   $$("#viewHost .ftab").forEach(function(b){ b.onclick=function(){ state.floor=b.dataset.f; render(); }; });
   bindOpen("#viewHost .tile");
 }
@@ -308,7 +311,11 @@ function openForm(r){
   var f=$("#roomForm").elements;
   f.RoomID.value=r.RoomID||""; f.RoomName.value=r.RoomName||"";
   f.Category.value=r.Category||CATEGORIES[0]; f.SourceType.value=r.SourceType||"";
-  f.Gender.value=r.Gender||"طلاب"; f.Building.value=r.Building||"";
+  f.Gender.value=r.Gender||"طلاب";
+  var bsel=f.Building; [].slice.call(bsel.querySelectorAll("option[data-legacy]")).forEach(function(o){ o.remove(); });
+  if(r.Building && ![].some.call(bsel.options,function(o){return o.value===r.Building;})){
+    var bo=document.createElement("option"); bo.value=r.Building; bo.textContent=r.Building; bo.dataset.legacy="1"; bsel.appendChild(bo); }
+  bsel.value=r.Building||"";
   var fl=f.Floor; if(r.Floor && ![].some.call(fl.options,function(o){return o.value===r.Floor;})){ var op=document.createElement("option"); op.value=r.Floor; op.textContent=r.Floor; fl.appendChild(op); }
   fl.value=r.Floor||""; f.Capacity.value=r.Capacity||""; f.Status.value=r.Status||"نشطة";
   f.Specs.value=r.Specs||""; f.Notes.value=r.Notes||"";

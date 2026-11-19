@@ -3,6 +3,19 @@
 يتبع هذا السجل ترقيم إصدار برقم عشري واحد (… 1.9 → 2.0).
 Semantic single-decimal versioning (… 1.9 → 2.0).
 
+## [2.4] — 2026-11-19
+**العربية — قائمة المباني الرئيسية**
+- قائمة «المباني» في شريط الفلاتر أصبحت المباني الرئيسية فقط بالترتيب: **Part 1 · Part 2 · Part 3 · Part 4 · Part 5 · Conference Hall** بدل الأسماء الخام (مثل `Part 4 - Female` / `Part 4 - Male`). اختيار «Part 4» يعرض قاعاته الـ 30 كلها (طالبات وطلاب).
+- اعتماد **Part 5** ضمن المباني الرئيسية (21 قاعة).
+- مزامنة بين القائمة وتبويبات مستكشف المباني في الاتجاهين، والقائمة مفعّلة في الطرق الثلاث.
+- خانة «المبنى» في نموذج الإضافة/التعديل أصبحت قائمة منسدلة بالمباني الستة، مع الحفاظ على القيمة القديمة للقاعات المسجّلة (مثل `Part 4 - Female`) دون تغيير البيانات.
+
+**English — main-building list**
+- The "Buildings" filter now lists only the main buildings, in order: **Part 1 · Part 2 · Part 3 · Part 4 · Part 5 · Conference Hall**, instead of raw names (e.g. `Part 4 - Female` / `Part 4 - Male`). Choosing "Part 4" shows all 30 of its rooms.
+- **Part 5** confirmed as a main building (21 rooms).
+- Two-way sync between the dropdown and the Building Explorer tabs; the dropdown works in all three views.
+- The "Building" field in the add/edit form is now a dropdown of the six buildings; existing rooms keep their stored value (e.g. `Part 4 - Female`) unchanged.
+
 ## [2.3] — 2026-11-19
 **العربية — تعيين الأدوار تلقائياً من رقم القاعة**
 - قاعدة الدور حسب أول رقم في رقم القاعة: **1 = الأرضي · 2 = الأول · 3 = الثاني · 4 = الثالث** (مثال: `(3254)` ← الثاني).
